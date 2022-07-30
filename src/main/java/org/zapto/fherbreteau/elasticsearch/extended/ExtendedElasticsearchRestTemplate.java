@@ -9,14 +9,13 @@ import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.time.Duration;
 
+@SuppressWarnings("deprecation")
 public class ExtendedElasticsearchRestTemplate extends ElasticsearchRestTemplate implements ExtendedElasticsearchOperations {
 
-    @SuppressWarnings("deprecation")
     public ExtendedElasticsearchRestTemplate(RestHighLevelClient client) {
         super(client);
     }
 
-    @SuppressWarnings("deprecation")
     public ExtendedElasticsearchRestTemplate(RestHighLevelClient client, ElasticsearchConverter elasticsearchConverter) {
         super(client, elasticsearchConverter);
     }

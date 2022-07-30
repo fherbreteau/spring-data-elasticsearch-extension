@@ -36,7 +36,7 @@ public class SkippingSearchHitsIteratorTest {
     private List<SearchHit<Object>> createSearchHitList() {
         SearchHit<Object>[] results = new SearchHit[10];
         for (int i = 0; i < results.length; i++) {
-            results[i] = new SearchHit<>(null, null, null, 0f, null, null, null, null, null, null, new Object());
+                results[i] = new SearchHit<>(null, null, null, 0f, null, null, null, null, null, null, new Object());
         }
         return asList(results);
     }
