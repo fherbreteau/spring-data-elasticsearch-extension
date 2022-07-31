@@ -21,9 +21,10 @@
         <!-- Tools dependencies -->
         <compiler.version>3.10.1</compiler.version>
         <jacoco.version>0.8.8</jacoco.version>
-        <checkstyle.version>3.1.2</checkstyle.version>
+        <checkstyle-maven.version>3.1.2</checkstyle-maven.version>
+        <checkstyle.version>10.3.2</checkstyle.version>
         <surefire.version>2.22.2</surefire.version>
-        <pitest.version>1.7.4</pitest.version>
+        <pitest.version>1.9.2</pitest.version>
     </properties>
     <dependencies>
         <dependency>
@@ -161,7 +162,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle.version}</version>
+                <version>${checkstyle-maven.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                 </configuration>
@@ -191,7 +200,7 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>0.15</version>
+                        <version>1.0.0</version>
                     </dependency>
                 </dependencies>
                 <configuration>
