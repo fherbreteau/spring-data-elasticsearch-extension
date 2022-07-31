@@ -23,7 +23,7 @@
         <jacoco.version>0.8.8</jacoco.version>
         <checkstyle.version>3.0.0</checkstyle.version>
         <surefire.version>2.22.2</surefire.version>
-        <pitest.version>1.7.4</pitest.version>
+        <pitest.version>1.9.3</pitest.version>
     </properties>
     <dependencies>
         <dependency>
