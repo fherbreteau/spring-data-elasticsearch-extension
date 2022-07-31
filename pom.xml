@@ -21,7 +21,7 @@
         <!-- Tools dependencies -->
         <compiler.version>3.10.1</compiler.version>
         <jacoco.version>0.8.8</jacoco.version>
-        <checkstyle.version>3.0.0</checkstyle.version>
+        <checkstyle.version>3.1.2</checkstyle.version>
         <surefire.version>2.22.2</surefire.version>
         <pitest.version>1.7.4</pitest.version>
     </properties>
