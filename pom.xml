@@ -22,7 +22,7 @@
         <jacoco.version>0.8.8</jacoco.version>
         <checkstyle.version>3.0.0</checkstyle.version>
         <surefire.version>2.22.2</surefire.version>
-        <pitest.version>1.9.3</pitest.version>
+        <pitest.version>1.7.4</pitest.version>
     </properties>
     <dependencies>
         <dependency>
@@ -162,7 +162,7 @@
                     </argLine>
                 </configuration>
             </plugin>
-            <!--
+
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
@@ -180,11 +180,13 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>1.0.0</version>
+                        <version>0.15</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <mutationThreshold>50</mutationThreshold>
+                </configuration>
             </plugin>
-            -->
         </plugins>
     </build>
 
