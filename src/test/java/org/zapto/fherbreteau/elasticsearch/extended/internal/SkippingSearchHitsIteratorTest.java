@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.elasticsearch.core.AggregationsContainer;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchScrollHits;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
@@ -213,15 +214,17 @@ public class SkippingSearchHitsIteratorTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldExtractAggregationsFromInitial() {
         // Given
-        when(searchScrollHits.getAggregations()).thenReturn(null);
+        AggregationsContainer container = mock(AggregationsContainer.class);
+        when(searchScrollHits.getAggregations()).thenReturn(container);
 
         // When
         SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 10, searchScrollHits, continueScrollFunction, clearScrollConsumer);
 
         // Then
-        assertThat(skippingSearchHitsIterator.getAggregations()).isNull();
+        assertThat(skippingSearchHitsIterator.getAggregations()).isNotNull();
     }
 
     @Test

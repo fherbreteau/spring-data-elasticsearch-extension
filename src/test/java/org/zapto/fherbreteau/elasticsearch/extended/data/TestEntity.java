@@ -3,7 +3,7 @@ package org.zapto.fherbreteau.elasticsearch.extended.data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-@Document(indexName = "blog")
+@Document(indexName = "testEntity")
 public class TestEntity {
 
     @Id
