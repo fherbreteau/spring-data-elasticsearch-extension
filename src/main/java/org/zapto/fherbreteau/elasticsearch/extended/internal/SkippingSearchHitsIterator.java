@@ -75,9 +75,7 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
     @Override
     public boolean hasNext() {
         if (currentScrollHits == null) {
-            currentScrollHits = searchHits.iterator();
-            scrollHitsCount = searchHits.getSearchHits().size();
-            continueScroll = currentScrollHits.hasNext();
+            updateInternalDatas(searchHits, false);
         }
 
         // Reach the from Index before starting the real stream.
@@ -85,14 +83,14 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
         while (!isClosed && continueScroll && currentCount.get() < fromIndex) {
             // Increment the counter with the SearchHits count
             currentCount.addAndGet(scrollHitsCount);
-            requestNextPage();
+            updateInternalDatas(continueScrollFunction.apply(scrollState.getScrollId()), true);
         }
 
         boolean hasNext = false;
 
         if (!isClosed && continueScroll && (maxCount <= 0 || currentCount.get() < maxCount)) {
             if (!currentScrollHits.hasNext()) {
-                requestNextPage();
+                updateInternalDatas(continueScrollFunction.apply(scrollState.getScrollId()), true);
             }
             hasNext = currentScrollHits.hasNext();
         }
@@ -104,11 +102,12 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
         return hasNext;
     }
 
-    private void requestNextPage() {
-        SearchScrollHits<T> nextPage = continueScrollFunction.apply(scrollState.getScrollId());
-        currentScrollHits = nextPage.iterator();
-        scrollHitsCount = nextPage.getSearchHits().size();
-        scrollState.updateScrollId(nextPage.getScrollId());
+    private void updateInternalDatas(SearchScrollHits<T> nextSearchHits, boolean updateScrollState) {
+        currentScrollHits = nextSearchHits.iterator();
+        scrollHitsCount = nextSearchHits.getSearchHits().size();
+        if (updateScrollState) {
+            scrollState.updateScrollId(nextSearchHits.getScrollId());
+        }
         continueScroll = currentScrollHits.hasNext();
     }
 
