@@ -95,7 +95,8 @@ fabric.properties
 # Checkstyle Idea
 .idea/checkstyle-idea.xml
 
-#
+# Snyk Idea
+.idea/snyk.project.settings.xml
 
 # Compiled class file
 *.class

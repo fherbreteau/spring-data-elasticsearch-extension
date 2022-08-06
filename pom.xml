@@ -204,7 +204,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <mutationThreshold>50</mutationThreshold>
+                    <mutationThreshold>80</mutationThreshold>
                 </configuration>
             </plugin>
         </plugins>

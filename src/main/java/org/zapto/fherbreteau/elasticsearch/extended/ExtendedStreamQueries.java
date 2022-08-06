@@ -20,8 +20,8 @@ final class ExtendedStreamQueries {
                                                    SearchScrollHits<T> searchHits,
                                                    Function<String, SearchScrollHits<T>> continueScrollFunction,
                                                    Consumer<List<String>> clearScrollConsumer) {
-        isTrue(maxCount > 0, "maxCount must be greater than zero");
-        isTrue(fromIndex % maxCount == 0, "fromIndex must be a multiple of maxCount");
+        isTrue(fromIndex >= 0, "fromIndex must be greater than zero.");
+        isTrue(maxCount <= 0 || fromIndex < maxCount, "fromIndex must be less than maxCount if positive.");
         notNull(searchHits, "searchHits must not be null.");
         notNull(searchHits.getScrollId(), "scrollId of searchHits must not be null.");
         notNull(continueScrollFunction, "continueScrollFunction must not be null.");

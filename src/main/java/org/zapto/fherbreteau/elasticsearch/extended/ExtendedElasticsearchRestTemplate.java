@@ -13,7 +13,7 @@ import java.time.Duration;
 public class ExtendedElasticsearchRestTemplate extends ElasticsearchRestTemplate implements ExtendedElasticsearchOperations {
 
     public ExtendedElasticsearchRestTemplate(RestHighLevelClient client) {
-        super(client);
+        this(client, null);
     }
 
     public ExtendedElasticsearchRestTemplate(RestHighLevelClient client, ElasticsearchConverter elasticsearchConverter) {
