@@ -1,4 +1,4 @@
-package org.zapto.fherbreteau.elasticsearch.extended;
+package org.springframework.data.elasticsearch.core;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -10,11 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.SearchHitsIterator;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
+import org.springframework.data.elasticsearch.core.convert.MappingElasticsearchConverter;
+import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
-import org.zapto.fherbreteau.elasticsearch.extended.data.TestEntity;
 
 import java.io.IOException;
 
@@ -25,7 +28,13 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("deprecation")
-public class ExtendedElasticsearchRestTemplateTest {
+class ExtendedElasticsearchRestTemplateTest {
+
+    @Document(indexName = "test")
+    static class TestEntity{
+        @Id
+        private String id;
+    }
 
     @Mock
     private RestHighLevelClient client;
@@ -33,8 +42,10 @@ public class ExtendedElasticsearchRestTemplateTest {
     private ExtendedElasticsearchRestTemplate extendedElasticsearchRestTemplate;
 
     @BeforeEach
-    public void createExtendedElasticsearchTemplate() {
-        extendedElasticsearchRestTemplate = new ExtendedElasticsearchRestTemplate(client);
+    public void createExtendedElasticsearchRestTemplate() {
+        SimpleElasticsearchMappingContext mappingContext = new SimpleElasticsearchMappingContext();
+        ElasticsearchConverter elasticsearchConverter = new MappingElasticsearchConverter(mappingContext);
+        extendedElasticsearchRestTemplate = new ExtendedElasticsearchRestTemplate(client, elasticsearchConverter);
     }
 
     private SearchHit createSearchHit() {
@@ -62,7 +73,7 @@ public class ExtendedElasticsearchRestTemplateTest {
     }
 
     @Test
-    public void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
+    void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
         // Given
         SearchResponse initialResponse = createResponse(1, "ScrollId");
         when(client.search(any(), eq(RequestOptions.DEFAULT))).thenReturn(initialResponse);
@@ -84,7 +95,7 @@ public class ExtendedElasticsearchRestTemplateTest {
     }
 
     @Test
-    public void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndex() throws IOException {
+    void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndex() throws IOException {
         // Given
         SearchResponse initialResponse = createResponse(100, "ScrollId");
         when(client.search(any(), eq(RequestOptions.DEFAULT))).thenReturn(initialResponse);

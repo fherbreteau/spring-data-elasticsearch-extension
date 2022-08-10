@@ -1,4 +1,4 @@
-package org.zapto.fherbreteau.elasticsearch.extended;
+package org.springframework.data.elasticsearch.client.elc;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.*;
@@ -11,15 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.client.elc.EntityAsMap;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.SearchHitsIterator;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
 import org.springframework.data.elasticsearch.core.convert.MappingElasticsearchConverter;
 import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext;
 import org.springframework.data.elasticsearch.core.query.Query;
-import org.zapto.fherbreteau.elasticsearch.extended.data.TestEntity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +30,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ExtendedElasticsearchTemplateTest {
+class ExtendedElasticsearchTemplateTest {
+
+    @Document(indexName = "test")
+    static class TestEntity{
+        @Id
+        private String id;
+    }
 
     @Mock
     private ElasticsearchClient client;
@@ -67,7 +72,7 @@ public class ExtendedElasticsearchTemplateTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
+    void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
         // Given
         SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
@@ -93,7 +98,7 @@ public class ExtendedElasticsearchTemplateTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndex() throws IOException {
+    void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndex() throws IOException {
         // Given
         SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);

@@ -1,28 +1,24 @@
-package org.zapto.fherbreteau.elasticsearch.extended.internal;
+package org.springframework.data.elasticsearch.core;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.elasticsearch.core.AggregationsContainer;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchScrollHits;
-import org.springframework.data.elasticsearch.core.TotalHitsRelation;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class SkippingSearchHitsIteratorTest {
+class SkippingSearchHitsIteratorTest {
 
     @Mock
     private SearchScrollHits<Object> searchScrollHits;
@@ -33,23 +29,20 @@ public class SkippingSearchHitsIteratorTest {
     @Mock
     private Consumer<List<String>> clearScrollConsumer;
 
-    @SuppressWarnings("unchecked")
-    private List<SearchHit<Object>> createSearchHitList() {
-        SearchHit<Object>[] results = new SearchHit[10];
-        for (int i = 0; i < results.length; i++) {
-                results[i] = new SearchHit<>(null, null, null, 0f, null, null, null, null, null, null, new Object());
-        }
-        return asList(results);
+    private SearchHit<Object> createSearchHit() {
+        return new SearchHit<>(null, null, null, 0f, null, null, null, null, null, null, new Object());
     }
 
-    @BeforeEach
-    public void setupStartSearchScrollHits() {
-        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+    private List<SearchHit<Object>> createSearchHitList() {
+        return IntStream.range(0, 10)
+                .mapToObj(index -> createSearchHit())
+                .collect(toList());
     }
 
     @Test
-    public void shouldInitializeTheIteratorAfterCreation() {
+    void shouldInitializeTheIteratorAfterCreation() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
         when(searchScrollHits.getSearchHits()).thenReturn(createSearchHitList());
         when(searchScrollHits.iterator()).thenCallRealMethod();
 
@@ -65,8 +58,9 @@ public class SkippingSearchHitsIteratorTest {
     }
 
     @Test
-    public void shouldReturnTheFirstElementAfterCreation() {
+    void shouldReturnTheFirstElementAfterCreation() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
         when(searchScrollHits.getSearchHits()).thenReturn(createSearchHitList());
         when(searchScrollHits.iterator()).thenCallRealMethod();
 
@@ -83,8 +77,9 @@ public class SkippingSearchHitsIteratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldRequestTheNextPageWhenFromIndexIsOnPageTwo() {
+    void shouldRequestTheNextPageWhenFromIndexIsOnPageTwo() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
         when(searchScrollHits.getSearchHits()).thenReturn(createSearchHitList());
         when(searchScrollHits.iterator()).thenCallRealMethod();
 
@@ -108,8 +103,9 @@ public class SkippingSearchHitsIteratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldRequestTheNextPageWhenFromIndexIsOnPageThree() {
+    void shouldRequestTheNextPageWhenFromIndexIsOnPageThree() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
         when(searchScrollHits.getSearchHits()).thenReturn(createSearchHitList());
         when(searchScrollHits.iterator()).thenCallRealMethod();
 
@@ -122,7 +118,6 @@ public class SkippingSearchHitsIteratorTest {
         when(nextPage2.getScrollId()).thenReturn("ScrollId3");
         when(nextPage2.getSearchHits()).thenReturn(emptyList());
         when(nextPage2.iterator()).thenCallRealMethod();
-
 
         when(continueScrollFunction.apply("ScrollId")).thenReturn(nextPage);
         when(continueScrollFunction.apply("ScrollId2")).thenReturn(nextPage2);
@@ -140,11 +135,11 @@ public class SkippingSearchHitsIteratorTest {
         verifyNoMoreInteractions(clearScrollConsumer);
     }
 
-
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldFailWhenRequestingATerminatedIterator() {
+    void shouldFailWhenRequestingATerminatedIterator() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
         when(searchScrollHits.getSearchHits()).thenReturn(createSearchHitList());
         when(searchScrollHits.iterator()).thenCallRealMethod();
 
@@ -157,7 +152,6 @@ public class SkippingSearchHitsIteratorTest {
         when(nextPage2.getScrollId()).thenReturn("ScrollId3");
         when(nextPage2.getSearchHits()).thenReturn(emptyList());
         when(nextPage2.iterator()).thenCallRealMethod();
-
 
         when(continueScrollFunction.apply("ScrollId")).thenReturn(nextPage);
         when(continueScrollFunction.apply("ScrollId2")).thenReturn(nextPage2);
@@ -178,8 +172,9 @@ public class SkippingSearchHitsIteratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldRequestTheNextPageWhenPullingAllResults() {
+    void shouldRequestTheNextPageWhenPullingAllResults() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
         when(searchScrollHits.getSearchHits()).thenReturn(createSearchHitList());
         when(searchScrollHits.iterator()).thenCallRealMethod();
 
@@ -192,7 +187,6 @@ public class SkippingSearchHitsIteratorTest {
         when(nextPage2.getScrollId()).thenReturn("ScrollId3");
         when(nextPage2.getSearchHits()).thenReturn(emptyList());
         when(nextPage2.iterator()).thenCallRealMethod();
-
 
         when(continueScrollFunction.apply("ScrollId")).thenReturn(nextPage);
         when(continueScrollFunction.apply("ScrollId2")).thenReturn(nextPage2);
@@ -215,65 +209,186 @@ public class SkippingSearchHitsIteratorTest {
 
     @Test
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void shouldExtractAggregationsFromInitial() {
+    void shouldExtractAggregationsFromInitial() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
         AggregationsContainer container = mock(AggregationsContainer.class);
         when(searchScrollHits.getAggregations()).thenReturn(container);
 
         // When
-        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 10, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
 
         // Then
         assertThat(skippingSearchHitsIterator.getAggregations()).isNotNull();
+
+        skippingSearchHitsIterator.close();
     }
 
     @Test
-    public void shouldExtractTotalHitsFromInitial() {
+    void shouldExtractTotalHitsFromInitial() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
         when(searchScrollHits.getTotalHits()).thenReturn(100L);
 
         // When
-        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 10, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
 
         // Then
         assertThat(skippingSearchHitsIterator.getTotalHits()).isEqualTo(100L);
+
+        skippingSearchHitsIterator.close();
     }
 
     @Test
-    public void shouldExtractMaxScoreFromInitial() {
+    void shouldExtractMaxScoreFromInitial() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
         when(searchScrollHits.getMaxScore()).thenReturn(1.0f);
 
         // When
-        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 10, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
 
         // Then
         assertThat(skippingSearchHitsIterator.getMaxScore()).isEqualTo(1.0f);
+
+        skippingSearchHitsIterator.close();
     }
 
     @Test
-    public void shouldExtractTotalHitsRelationFromInitial() {
+    void shouldExtractTotalHitsRelationFromInitial() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
         when(searchScrollHits.getTotalHitsRelation()).thenReturn(TotalHitsRelation.EQUAL_TO);
 
         // When
-        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 10, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
 
         // Then
         assertThat(skippingSearchHitsIterator.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.EQUAL_TO);
+
+        skippingSearchHitsIterator.close();
     }
 
     @Test
-    public void shouldExceptWhenTryingToRemoveElement() {
+    void shouldExceptWhenTryingToRemoveElement() {
         // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
 
         // When
-        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 10, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+        SkippingSearchHitsIterator<Object> skippingSearchHitsIterator = new SkippingSearchHitsIterator<>(0, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
 
         //Then
         assertThatThrownBy(skippingSearchHitsIterator::remove, "Removing an element should fail")
                 .isInstanceOf(UnsupportedOperationException.class);
+
+        skippingSearchHitsIterator.close();
     }
 
+    @Test
+    void shouldReturnAnIteratorWhenProvidingTheExpectedValues() {
+        // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
 
+        // When
+        SearchHitsIterator<Object> iterator = new SkippingSearchHitsIterator<>(100, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+
+        // Then
+        assertThat(iterator).isNotNull().hasNext();
+
+    }
+
+    @Test
+    void shouldReturnAnIteratorWhenProvidingNegativeMaxCount() {
+        // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        when(searchScrollHits.getSearchHits()).thenReturn(List.of(createSearchHit()));
+        when(searchScrollHits.iterator()).thenCallRealMethod();
+
+        // When
+        SearchHitsIterator<Object> iterator = new SkippingSearchHitsIterator<>(-1, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer);
+
+        // Then
+        assertThat(iterator).isNotNull().hasNext();
+
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void shouldThrowExceptionWhenFromIndexIsNegative() {
+        // Given
+        // When
+        // Then
+        assertThatThrownBy(() -> new SkippingSearchHitsIterator<>(100, -1, searchScrollHits, continueScrollFunction, clearScrollConsumer))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("fromIndex must be greater than zero.");
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void shouldThrowExceptionWhenFromIndexIsGreaterThanAPositiveMaxCount() {
+        // Given
+        // When
+        // Then
+        assertThatThrownBy(() -> new SkippingSearchHitsIterator<>(1, 2, searchScrollHits, continueScrollFunction, clearScrollConsumer))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("fromIndex must be less than maxCount if positive.");
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void shouldThrowExceptionWhenSearchScrollHitsIsNull() {
+        // Given
+        // When
+        // Then
+        assertThatThrownBy(() -> new SkippingSearchHitsIterator<>(100, 0, null, continueScrollFunction, clearScrollConsumer))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("searchHits must not be null.");
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void shouldThrowExceptionWhenScrollIdIsNull() {
+        // Given
+        // When
+        // Then
+        assertThatThrownBy(() -> new SkippingSearchHitsIterator<>(100, 0, searchScrollHits, continueScrollFunction, clearScrollConsumer))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("scrollId of searchHits must not be null.");
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void shouldThrowExceptionWhenContinueScrollFunctionIsNull() {
+        // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        // When
+        // Then
+        assertThatThrownBy(() -> new SkippingSearchHitsIterator<>(100, 0, searchScrollHits, null, clearScrollConsumer))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("continueScrollFunction must not be null.");
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void shouldThrowExceptionWhenClearScrollFunctionIsNull() {
+        // Given
+        when(searchScrollHits.getScrollId()).thenReturn("ScrollId");
+        // When
+        // Then
+        assertThatThrownBy(() -> new SkippingSearchHitsIterator<>(100, 0, searchScrollHits, continueScrollFunction, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("clearScrollConsumer must not be null.");
+    }
 }
