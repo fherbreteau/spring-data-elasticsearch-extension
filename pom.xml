@@ -24,7 +24,7 @@
         <checkstyle-maven.version>3.2.0</checkstyle-maven.version>
         <checkstyle.version>10.3.4</checkstyle.version>
         <surefire.version>2.22.2</surefire.version>
-        <pitest.version>1.9.6</pitest.version>
+        <pitest.version>1.9.8</pitest.version>
     </properties>
     <dependencies>
         <dependency>
