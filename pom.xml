@@ -15,7 +15,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Dependencies versions -->
-        <spring-boot.version>2.7.3</spring-boot.version>
+        <spring-boot.version>2.7.4</spring-boot.version>
         <testcontainers.version>1.17.3</testcontainers.version>
 
         <!-- Tools dependencies -->
