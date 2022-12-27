@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOperations, ApplicationContextAware {
 
     protected final ElasticsearchConverter elasticsearchConverter;
-    @Nullable protected EntityCallbacks entityCallbacks;
+    @Nullable
+    protected EntityCallbacks entityCallbacks;
 
     protected AbstractExtendedSearchTemplate() {
         this(null);
