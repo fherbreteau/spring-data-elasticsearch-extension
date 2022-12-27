@@ -1,19 +1,21 @@
-package org.zapto.fherbreteau.elasticsearch.extended.internal;
+package org.springframework.data.elasticsearch.core;
 
 import org.springframework.data.elasticsearch.client.util.ScrollState;
-import org.springframework.data.elasticsearch.core.*;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
+import static java.util.Objects.requireNonNull;
+import static org.springframework.util.Assert.isTrue;
+import static org.springframework.util.Assert.notNull;
+
+class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
 
     private final AtomicInteger currentCount = new AtomicInteger();
     private final int maxCount;
@@ -25,21 +27,33 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
 
     private Iterator<SearchHit<T>> currentScrollHits;
     private int scrollHitsCount;
-    private boolean continueScroll = true;
+    private boolean continueScroll;
     private boolean isClosed = false;
 
     public SkippingSearchHitsIterator(int maxCount,
                                       int fromIndex,
-                                      SearchScrollHits<T> searchHits,
-                                      Function<String, SearchScrollHits<T>> continueScrollFunction,
-                                      Consumer<List<String>> clearScrollConsumer) {
-        this.maxCount = maxCount;
+                                      @Nullable SearchScrollHits<T> searchHits,
+                                      @Nullable Function<String, SearchScrollHits<T>> continueScrollFunction,
+                                      @Nullable Consumer<List<String>> clearScrollConsumer) {
+        isTrue(fromIndex >= 0, "fromIndex must be greater than zero.");
+        isTrue(maxCount <= 0 || fromIndex < maxCount, "fromIndex must be less than maxCount if positive.");
         this.fromIndex = fromIndex;
+        this.maxCount = maxCount;
+        notNull(searchHits, "searchHits must not be null.");
+        notNull(searchHits.getScrollId(), "scrollId of searchHits must not be null.");
         this.searchHits = searchHits;
+        notNull(continueScrollFunction, "continueScrollFunction must not be null.");
         this.continueScrollFunction = continueScrollFunction;
+        notNull(clearScrollConsumer, "clearScrollConsumer must not be null.");
         this.clearScrollConsumer = clearScrollConsumer;
-        scrollState = new ScrollState(Objects.requireNonNull(searchHits.getScrollId()));
 
+        currentScrollHits = searchHits.iterator();
+        scrollHitsCount = searchHits.getSearchHits().size();
+        scrollState = new ScrollState(requireNonNull(searchHits.getScrollId()));
+        continueScroll = currentScrollHits.hasNext();
+
+        // Skip required element
+        initIterator();
     }
 
     @Override
@@ -67,30 +81,33 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public TotalHitsRelation getTotalHitsRelation() {
         return searchHits.getTotalHitsRelation();
     }
 
+    private void initIterator() {
+        while (!isClosed && continueScroll && currentCount.get() < fromIndex) {
+            if ((fromIndex - currentCount.get()) > scrollHitsCount) {
+                // Increment the counter with the SearchHits count
+                currentCount.addAndGet(scrollHitsCount);
+                updateInternalDatas(continueScrollFunction.apply(scrollState.getScrollId()));
+            } else {
+                while (currentCount.get() < fromIndex && currentScrollHits.hasNext()) {
+                    currentCount.incrementAndGet();
+                    currentScrollHits.next();
+                }
+            }
+        }
+    }
+
     @Override
     public boolean hasNext() {
-        if (currentScrollHits == null) {
-            updateInternalDatas(searchHits, false);
-        }
-
-        // Reach the from Index before starting the real stream.
-        // This operation permits to avoid a skip operation in the stream.
-        while (!isClosed && continueScroll && currentCount.get() < fromIndex) {
-            // Increment the counter with the SearchHits count
-            currentCount.addAndGet(scrollHitsCount);
-            updateInternalDatas(continueScrollFunction.apply(scrollState.getScrollId()), true);
-        }
-
         boolean hasNext = false;
 
         if (!isClosed && continueScroll && (maxCount <= 0 || currentCount.get() < maxCount)) {
             if (!currentScrollHits.hasNext()) {
-                updateInternalDatas(continueScrollFunction.apply(scrollState.getScrollId()), true);
+                updateInternalDatas(continueScrollFunction.apply(scrollState.getScrollId()));
             }
             hasNext = currentScrollHits.hasNext();
         }
@@ -102,12 +119,10 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
         return hasNext;
     }
 
-    private void updateInternalDatas(SearchScrollHits<T> nextSearchHits, boolean updateScrollState) {
+    private void updateInternalDatas(SearchScrollHits<T> nextSearchHits) {
         currentScrollHits = nextSearchHits.iterator();
         scrollHitsCount = nextSearchHits.getSearchHits().size();
-        if (updateScrollState) {
-            scrollState.updateScrollId(nextSearchHits.getScrollId());
-        }
+        scrollState.updateScrollId(nextSearchHits.getScrollId());
         continueScroll = currentScrollHits.hasNext();
     }
 
@@ -118,10 +133,5 @@ public class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
             return currentScrollHits.next();
         }
         throw new NoSuchElementException();
-    }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
     }
 }
