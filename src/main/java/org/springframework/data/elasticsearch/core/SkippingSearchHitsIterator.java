@@ -1,9 +1,9 @@
 package org.springframework.data.elasticsearch.core;
 
 import org.springframework.data.elasticsearch.client.util.ScrollState;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -81,7 +81,7 @@ class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
     }
 
     @Override
-    @NonNull
+    @Nonnull
     public TotalHitsRelation getTotalHitsRelation() {
         return searchHits.getTotalHitsRelation();
     }

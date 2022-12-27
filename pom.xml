@@ -15,15 +15,15 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Dependencies versions -->
-        <spring.elasticsearch.version>4.4.2</spring.elasticsearch.version>
-        <spring.version>5.3.13</spring.version>
+        <spring.elasticsearch.version>4.4.6</spring.elasticsearch.version>
+        <spring.version>5.3.24</spring.version>
 
         <!-- test Dependencies versions -->
         <junit5.version>5.8.2</junit5.version>
-        <mockito.version>4.6.1</mockito.version>
+        <mockito.version>4.10.0</mockito.version>
         <assertj.version>3.23.1</assertj.version>
-        <log4j.version>2.18.0</log4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
+        <log4j.version>2.19.0</log4j.version>
+        <slf4j.version>2.0.5</slf4j.version>
 
         <!-- Tools dependencies -->
         <compiler.version>3.10.1</compiler.version>
@@ -43,8 +43,43 @@
                     <groupId>org.projectlombok</groupId>
                     <artifactId>lombok</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-cbor</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
+        <!-- Update HTTPClient version for CVE Fix -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Update Jackson Dataformat version for CVE Fix -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-cbor</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+
+        <!-- Update Commons-Codec version for CVE Fix -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
+
+        <!-- Jakarta Json -->
         <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
@@ -197,6 +232,9 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <excludes>
+                                <exclude>**/*Config*.*</exclude>
+                            </excludes>
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>

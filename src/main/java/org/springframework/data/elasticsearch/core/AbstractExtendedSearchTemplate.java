@@ -18,10 +18,10 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.query.SeqNoPrimaryTerm;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 import org.springframework.data.mapping.callback.EntityCallbacks;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOperations, ApplicationContextAware {
 
     protected final ElasticsearchConverter elasticsearchConverter;
-    @Nullable protected EntityCallbacks entityCallbacks;
+    @Nullable
+    protected EntityCallbacks entityCallbacks;
 
     protected AbstractExtendedSearchTemplate() {
         this(null);
@@ -50,7 +51,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     }
 
     @Override
-    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
 
         if (entityCallbacks == null) {
             setEntityCallbacks(EntityCallbacks.create(applicationContext));
@@ -80,6 +81,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
 
     @Override
     public <T> SearchHitsIterator<T> searchForStream(Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
+        Assert.notNull(query, "query must not be null");
 
         Duration scrollTime = query.getScrollTime() != null ? query.getScrollTime() : Duration.ofMinutes(1);
         long scrollTimeInMillis = scrollTime.toMillis();
@@ -144,12 +146,14 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             if (indexedObjectInformation.getSeqNo() != null && indexedObjectInformation.getPrimaryTerm() != null
                     && persistentEntity.hasSeqNoPrimaryTermProperty()) {
                 ElasticsearchPersistentProperty seqNoPrimaryTermProperty = persistentEntity.getSeqNoPrimaryTermProperty();
+                assert seqNoPrimaryTermProperty != null;
                 propertyAccessor.setProperty(seqNoPrimaryTermProperty,
                         new SeqNoPrimaryTerm(indexedObjectInformation.getSeqNo(), indexedObjectInformation.getPrimaryTerm()));
             }
 
             if (indexedObjectInformation.getVersion() != null && persistentEntity.hasVersionProperty()) {
                 ElasticsearchPersistentProperty versionProperty = persistentEntity.getVersionProperty();
+                assert versionProperty != null;
                 propertyAccessor.setProperty(versionProperty, indexedObjectInformation.getVersion());
             }
 
@@ -227,8 +231,8 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     }
 
     protected interface SearchDocumentResponseCallback<T> {
-        @NonNull
-        T doWith(@NonNull SearchDocumentResponse response);
+        @Nonnull
+        T doWith(@Nonnull SearchDocumentResponse response);
     }
 
     protected class ReadSearchScrollDocumentResponseCallback<T> implements SearchDocumentResponseCallback<SearchScrollHits<T>> {
@@ -243,9 +247,9 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             this.type = type;
         }
 
-        @NonNull
+        @Nonnull
         @Override
-        public SearchScrollHits<T> doWith(@NonNull SearchDocumentResponse response) {
+        public SearchScrollHits<T> doWith(@Nonnull SearchDocumentResponse response) {
             List<T> entities = response.getSearchDocuments().stream().map(delegate::doWith).collect(Collectors.toList());
             return (SearchScrollHits<T>) SearchHitMapping.mappingFor(type, elasticsearchConverter).mapHits(response, entities);
         }
