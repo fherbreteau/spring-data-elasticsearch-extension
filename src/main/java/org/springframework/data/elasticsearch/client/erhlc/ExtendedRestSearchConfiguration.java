@@ -1,17 +1,19 @@
-package org.springframework.data.elasticsearch.config;
+package org.springframework.data.elasticsearch.client.erhlc;
 
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.elasticsearch.core.ExtendedElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.ExtendedSearchOperations;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
 
-@Configuration
+/**
+ * @since 0.1
+ * @deprecated since 1.0
+ */
+@Deprecated(since = "1.0")
 public interface ExtendedRestSearchConfiguration {
 
     /**
-     * Creates {@link ExtendedSearchOperations}.
+     * Creates {@link ExtendedSearchOperations} implementation using a {@link org.elasticsearch.client.RestHighLevelClient}.
      *
      * @return never {@literal null}.
      */
