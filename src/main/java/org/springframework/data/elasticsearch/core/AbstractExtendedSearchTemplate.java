@@ -26,13 +26,11 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOperations, ApplicationContextAware {
 
     protected final ElasticsearchConverter elasticsearchConverter;
-    @Nullable
-    protected EntityCallbacks entityCallbacks;
+    @Nullable protected EntityCallbacks entityCallbacks;
 
     protected AbstractExtendedSearchTemplate() {
         this(null);
@@ -57,8 +55,8 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             setEntityCallbacks(EntityCallbacks.create(applicationContext));
         }
 
-        if (elasticsearchConverter instanceof ApplicationContextAware) {
-            ((ApplicationContextAware) elasticsearchConverter).setApplicationContext(applicationContext);
+        if (elasticsearchConverter instanceof ApplicationContextAware applicationContextAware) {
+            applicationContextAware.setApplicationContext(applicationContext);
         }
     }
 
@@ -80,10 +78,13 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     }
 
     @Override
-    public <T> SearchHitsIterator<T> searchForStream(Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
+    public <T> SearchHitsIterator<T> searchForStream(@Nullable Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
         Assert.notNull(query, "query must not be null");
 
-        Duration scrollTime = query.getScrollTime() != null ? query.getScrollTime() : Duration.ofMinutes(1);
+        Duration scrollTime = query.getScrollTime();
+        if (scrollTime == null) {
+            scrollTime = Duration.ofMinutes(1);
+        }
         long scrollTimeInMillis = scrollTime.toMillis();
         // noinspection ConstantConditions
         int maxCount = query.isLimiting() ? query.getMaxResults() : 0;
@@ -97,26 +98,26 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     /*
      * internal use only, not for public API
      */
-    protected abstract <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
+    public abstract <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
                                                                  IndexCoordinates index);
 
     /*
      * internal use only, not for public API
      */
-    protected abstract <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis,
+    public abstract <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis,
                                                                     Class<T> clazz, IndexCoordinates index);
 
     /*
      * internal use only, not for public API
      */
-    protected void searchScrollClear(String scrollId) {
+    public void searchScrollClear(String scrollId) {
         searchScrollClear(Collections.singletonList(scrollId));
     }
 
     /*
      * internal use only, not for public API
      */
-    protected abstract void searchScrollClear(List<String> scrollIds);
+    public abstract void searchScrollClear(List<String> scrollIds);
 
     /**
      * @param clazz the entity class
@@ -250,7 +251,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         @Nonnull
         @Override
         public SearchScrollHits<T> doWith(@Nonnull SearchDocumentResponse response) {
-            List<T> entities = response.getSearchDocuments().stream().map(delegate::doWith).collect(Collectors.toList());
+            List<T> entities = response.getSearchDocuments().stream().map(delegate::doWith).toList();
             return (SearchScrollHits<T>) SearchHitMapping.mappingFor(type, elasticsearchConverter).mapHits(response, entities);
         }
     }

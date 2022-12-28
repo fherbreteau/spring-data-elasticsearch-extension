@@ -1,4 +1,4 @@
-package org.springframework.data.elasticsearch.core;
+package org.springframework.data.elasticsearch.client.erhlc;
 
 import org.elasticsearch.action.search.ClearScrollRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -9,8 +9,9 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.core.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.core.AbstractExtendedSearchTemplate;
+import org.springframework.data.elasticsearch.core.SearchScrollHits;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
-import org.springframework.data.elasticsearch.core.document.SearchDocumentResponseBuilder;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.util.Assert;
@@ -18,34 +19,45 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.util.Assert.notNull;
-
-@SuppressWarnings("deprecation")
+/**
+ * ElasticsearchRestTemplate
+ * @since 0.1
+ * @deprecated since 1.0
+ */
+@Deprecated(since = "1.0")
 public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTemplate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedElasticsearchRestTemplate.class);
 
     private final RestHighLevelClient client;
+    private final ElasticsearchExceptionTranslator exceptionTranslator = new ElasticsearchExceptionTranslator();
     protected RequestFactory requestFactory;
 
-    private final ElasticsearchExceptionTranslator exceptionTranslator = new ElasticsearchExceptionTranslator();
-
     public ExtendedElasticsearchRestTemplate(RestHighLevelClient client) {
-        notNull(client, "client must not be null");
+
+        super();
+
+        Assert.notNull(client, "client must not be null");
+
         this.client = client;
         requestFactory = new RequestFactory(this.elasticsearchConverter);
     }
 
     public ExtendedElasticsearchRestTemplate(RestHighLevelClient client, ElasticsearchConverter elasticsearchConverter) {
+
         super(elasticsearchConverter);
-        notNull(client, "client must not be null");
+
+        Assert.notNull(client, "client must not be null");
+
         this.client = client;
         requestFactory = new RequestFactory(this.elasticsearchConverter);
 
     }
 
     @Override
-    protected <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz, IndexCoordinates index) {
+    public <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
+                                                        IndexCoordinates index) {
+
         Assert.notNull(query.getPageable(), "pageable of query must not be null.");
 
         SearchRequest searchRequest = requestFactory.searchRequest(query, clazz, index);
@@ -60,7 +72,7 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
     }
 
     @Override
-    protected <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis, Class<T> clazz, IndexCoordinates index) {
+    public <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis, Class<T> clazz, IndexCoordinates index) {
 
         SearchScrollRequest request = new SearchScrollRequest(scrollId);
         request.scroll(TimeValue.timeValueMillis(scrollTimeInMillis));
@@ -74,7 +86,7 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
     }
 
     @Override
-    protected void searchScrollClear(List<String> scrollIds) {
+    public void searchScrollClear(List<String> scrollIds) {
         try {
             ClearScrollRequest request = new ClearScrollRequest();
             request.scrollIds(scrollIds);
@@ -124,10 +136,9 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
      */
     private RuntimeException translateException(Exception exception) {
 
-        RuntimeException runtimeException = exception instanceof RuntimeException ? (RuntimeException) exception
+        RuntimeException runtimeException = exception instanceof RuntimeException rtException ? rtException
                 : new RuntimeException(exception.getMessage(), exception);
-        RuntimeException potentiallyTranslatedException = exceptionTranslator
-                .translateExceptionIfPossible(runtimeException);
+        RuntimeException potentiallyTranslatedException = exceptionTranslator .translateExceptionIfPossible(runtimeException);
 
         return potentiallyTranslatedException != null ? potentiallyTranslatedException : runtimeException;
     }

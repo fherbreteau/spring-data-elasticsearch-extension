@@ -1,5 +1,6 @@
-package org.springframework.data.elasticsearch.core;
+package org.springframework.data.elasticsearch.client.erhlc;
 
+import co.elastic.clients.elasticsearch.core.ClearScrollRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -10,18 +11,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
-import org.springframework.data.elasticsearch.core.convert.MappingElasticsearchConverter;
-import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.SearchHitsIterator;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -43,9 +44,7 @@ class ExtendedElasticsearchRestTemplateTest {
 
     @BeforeEach
     public void createExtendedElasticsearchRestTemplate() {
-        SimpleElasticsearchMappingContext mappingContext = new SimpleElasticsearchMappingContext();
-        ElasticsearchConverter elasticsearchConverter = new MappingElasticsearchConverter(mappingContext);
-        extendedElasticsearchRestTemplate = new ExtendedElasticsearchRestTemplate(client, elasticsearchConverter);
+        extendedElasticsearchRestTemplate = new ExtendedElasticsearchRestTemplate(client);
     }
 
     private SearchHit createSearchHit() {
@@ -103,6 +102,7 @@ class ExtendedElasticsearchRestTemplateTest {
         SearchResponse continuedResponse = createResponse(1, "ContinuedScrollId");
         SearchResponse terminalResponse = createResponse(0, "Empty");
         when(client.scroll(any(), eq(RequestOptions.DEFAULT))).thenReturn(continuedResponse, terminalResponse);
+        when(client.clearScroll(any(), eq(RequestOptions.DEFAULT))).thenThrow(IOException.class);
 
         Query query = new NativeSearchQueryBuilder()
                 .withPageable(Pageable.ofSize(100))
@@ -115,6 +115,57 @@ class ExtendedElasticsearchRestTemplateTest {
         assertThat(iterator.next()).isNotNull();
         assertThat(iterator).isExhausted();
 
+        verify(client).clearScroll(any(), eq(RequestOptions.DEFAULT));
+    }
+
+    @Test
+    void shouldThrowAssertionErrorIfQueryIsNull() {
+        assertThatThrownBy(() -> extendedElasticsearchRestTemplate.searchForStream(null, 0, TestEntity.class))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("query must not be null");
+    }
+
+    @Test
+    void shouldThrowAssertionErrorIfPageableOfQueryIsNull() {
+        Query query = mock(Query.class);
+
+        assertThatThrownBy(() -> extendedElasticsearchRestTemplate.searchForStream(query, 0, TestEntity.class))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("pageable of query must not be null.");
+    }
+
+    @Test
+    void shouldHandleRequestExceptionAndTransformIt() throws IOException {
+        // Given
+        when(client.search(any(), eq(RequestOptions.DEFAULT))).thenThrow(IOException.class);
+        Query query = new NativeSearchQueryBuilder()
+                .withPageable(Pageable.ofSize(100))
+                .build();
+
+        // When
+        assertThatThrownBy(() -> extendedElasticsearchRestTemplate.searchForStream(query, 0, TestEntity.class))
+                .isInstanceOf(DataAccessException.class);
+    }
+
+    @Test
+    void shouldHandleRuntimeExceptionAndReThrowIt() throws IOException {
+        // Given
+        when(client.search(any(), eq(RequestOptions.DEFAULT))).thenThrow(RuntimeException.class);
+        Query query = new NativeSearchQueryBuilder()
+                .withPageable(Pageable.ofSize(100))
+                .build();
+
+        // When
+        assertThatThrownBy(() -> extendedElasticsearchRestTemplate.searchForStream(query, 0, TestEntity.class))
+                .isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    void shouldNotCallElasticsearchSWhenClearingEmptyScrollIdList() throws IOException {
+        // When
+        extendedElasticsearchRestTemplate.searchScrollClear("empty");
+
+        // Then
         verify(client).clearScroll(any(), eq(RequestOptions.DEFAULT));
     }
 }

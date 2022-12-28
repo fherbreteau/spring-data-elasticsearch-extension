@@ -22,6 +22,16 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     private final RequestConverter requestConverter;
     private final ElasticsearchExceptionTranslator exceptionTranslator;
 
+    public ExtendedElasticsearchTemplate(ElasticsearchClient client) {
+
+        Assert.notNull(client, "client must not be null");
+
+        this.client = client;
+        this.jsonpMapper = client._transport().jsonpMapper();
+        requestConverter = new RequestConverter(elasticsearchConverter, jsonpMapper);
+        exceptionTranslator = new ElasticsearchExceptionTranslator(jsonpMapper);
+    }
+
     public ExtendedElasticsearchTemplate(ElasticsearchClient client, ElasticsearchConverter elasticsearchConverter) {
         super(elasticsearchConverter);
 
@@ -34,7 +44,8 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     }
 
     @Override
-    protected <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz, IndexCoordinates index) {
+    public <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
+                                                     IndexCoordinates index) {
 
         Assert.notNull(query, "query must not be null");
         Assert.notNull(query.getPageable(), "pageable of query must not be null.");
@@ -46,7 +57,8 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     }
 
     @Override
-    protected <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis, Class<T> clazz, IndexCoordinates index) {
+    public <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis, Class<T> clazz,
+                                                        IndexCoordinates index) {
 
         Assert.notNull(scrollId, "scrollId must not be null");
 
@@ -67,7 +79,7 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     }
 
     @Override
-    protected void searchScrollClear(List<String> scrollIds) {
+    public void searchScrollClear(List<String> scrollIds) {
         Assert.notNull(scrollIds, "scrollIds must not be null");
 
         if (!scrollIds.isEmpty()) {
@@ -76,7 +88,6 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
         }
     }
 
-    // region client callback
     /**
      * Callback interface to be used with {@link #execute(ClientCallback)} for operating directly on
      * the {@link ElasticsearchClient}.
@@ -103,5 +114,4 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
             throw exceptionTranslator.translateException(e);
         }
     }
-    // endregion
 }
