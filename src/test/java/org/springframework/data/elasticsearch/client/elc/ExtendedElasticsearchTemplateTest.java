@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 class ExtendedElasticsearchTemplateTest {
 
     @Document(indexName = "test")
-    static class TestEntity{
+    static class TestEntity {
         @Id
         private String id;
     }
