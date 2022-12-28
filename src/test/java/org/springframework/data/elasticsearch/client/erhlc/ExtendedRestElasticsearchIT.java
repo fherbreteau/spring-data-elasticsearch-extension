@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringIntegrationTest
 @ContextConfiguration(classes = { ElasticsearchRestTemplateConfiguration.class })
 @SuppressWarnings("deprecation")
-public class ExtendedRestElasticsearchIT {
+class ExtendedRestElasticsearchIT {
 
     @Autowired
     private ExtendedElasticsearchRestTemplate extendedSearchTemplate;
@@ -20,7 +20,7 @@ public class ExtendedRestElasticsearchIT {
 
     @Test
     @DisplayName("should have an ExtendedElasticsearchRestTemplate")
-    public void shouldHaveAElasticsearchTemplat() {
+    void shouldHaveAElasticsearchTemplat() {
         assertThat(extendedSearchTemplate).isNotNull().isInstanceOf(ExtendedElasticsearchRestTemplate.class);
     }
 

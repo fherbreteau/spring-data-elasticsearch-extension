@@ -81,7 +81,10 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     public <T> SearchHitsIterator<T> searchForStream(@Nullable Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
         Assert.notNull(query, "query must not be null");
 
-        Duration scrollTime = query.getScrollTime() != null ? query.getScrollTime() : Duration.ofMinutes(1);
+        Duration scrollTime = query.getScrollTime();
+        if (scrollTime == null) {
+            scrollTime = Duration.ofMinutes(1);
+        }
         long scrollTimeInMillis = scrollTime.toMillis();
         // noinspection ConstantConditions
         int maxCount = query.isLimiting() ? query.getMaxResults() : 0;
