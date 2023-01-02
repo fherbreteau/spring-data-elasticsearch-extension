@@ -20,7 +20,7 @@
         <elasticsearch-rhlc.version>7.17.8</elasticsearch-rhlc.version>
 
         <!-- test Dependencies versions -->
-        <junit5.version>5.8.2</junit5.version>
+        <junit5.version>5.9.1</junit5.version>
         <mockito.version>4.11.0</mockito.version>
         <assertj.version>3.23.1</assertj.version>
         <log4j.version>2.19.0</log4j.version>
