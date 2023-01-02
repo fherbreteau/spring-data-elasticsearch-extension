@@ -38,7 +38,6 @@
 
         <!-- Sonar configuration properties -->
         <sonar.organization>fherbreteau</sonar.organization>
-        <sonar.projectKey>fherbreteau_spring-data-elasticsearch-extension</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencies>
