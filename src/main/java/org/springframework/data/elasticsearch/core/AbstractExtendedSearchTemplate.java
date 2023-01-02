@@ -86,8 +86,10 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             scrollTime = Duration.ofMinutes(1);
         }
         long scrollTimeInMillis = scrollTime.toMillis();
-        // noinspection ConstantConditions
-        int maxCount = query.isLimiting() ? query.getMaxResults() : 0;
+        int maxCount = 0;
+        if (query.getMaxResults() != null) {
+            maxCount = query.getMaxResults();
+        }
 
         return new SkippingSearchHitsIterator<>(maxCount, fromIndex,
             searchScrollStart(scrollTimeInMillis, query, clazz, index),
@@ -125,7 +127,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
      * @since 4.0
      */
     public IndexCoordinates getIndexCoordinatesFor(Class<?> clazz) {
-        return getRequiredPersistentEntity(clazz).getIndexCoordinates();
+        return elasticsearchConverter.getMappingContext().getRequiredPersistentEntity(clazz).getIndexCoordinates();
     }
 
     @SuppressWarnings("unchecked")
@@ -161,10 +163,6 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             return (T) propertyAccessor.getBean();
         }
         return entity;
-    }
-
-    protected ElasticsearchPersistentEntity<?> getRequiredPersistentEntity(Class<?> clazz) {
-        return elasticsearchConverter.getMappingContext().getRequiredPersistentEntity(clazz);
     }
 
     protected <T> SearchDocumentResponse.EntityCreator<T> getEntityCreator(ReadDocumentCallback<T> documentCallback) {
@@ -251,7 +249,9 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         @Nonnull
         @Override
         public SearchScrollHits<T> doWith(@Nonnull SearchDocumentResponse response) {
-            List<T> entities = response.getSearchDocuments().stream().map(delegate::doWith).toList();
+            List<T> entities = response.getSearchDocuments().stream()
+                    .map(delegate::doWith)
+                    .toList();
             return (SearchScrollHits<T>) SearchHitMapping.mappingFor(type, elasticsearchConverter).mapHits(response, entities);
         }
     }

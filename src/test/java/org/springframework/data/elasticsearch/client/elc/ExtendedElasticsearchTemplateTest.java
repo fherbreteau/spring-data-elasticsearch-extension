@@ -11,12 +11,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.SearchHitsIterator;
+import org.springframework.data.elasticsearch.core.event.AfterConvertCallback;
+import org.springframework.data.elasticsearch.core.event.AfterLoadCallback;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.SeqNoPrimaryTerm;
+import org.springframework.data.mapping.callback.EntityCallbacks;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,10 +40,27 @@ class ExtendedElasticsearchTemplateTest {
     static class TestEntity {
         @Id
         private String id;
+
+        private SeqNoPrimaryTerm primaryTerm;
+
+        TestEntity(String id, SeqNoPrimaryTerm primaryTerm) {
+            this.id = id;
+            this.primaryTerm = primaryTerm;
+        }
+
+        public SeqNoPrimaryTerm getPrimaryTerm() {
+            return primaryTerm;
+        }
     }
 
     @Mock
     private ElasticsearchClient client;
+
+    @Mock
+    private ApplicationContext context;
+
+    @Mock
+    private EntityCallbacks entityCallbacks;
 
     private ExtendedElasticsearchTemplate extendedElasticsearchTemplate;
 
@@ -49,13 +71,23 @@ class ExtendedElasticsearchTemplateTest {
         when(transport.jsonpMapper()).thenReturn(new SimpleJsonpMapper());
 
         extendedElasticsearchTemplate = new ExtendedElasticsearchTemplate(client);
+        extendedElasticsearchTemplate.setEntityCallbacks(entityCallbacks);
+        extendedElasticsearchTemplate.setApplicationContext(context);
+
+        lenient().when(entityCallbacks.callback(eq(AfterLoadCallback.class), any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
+        lenient().when(entityCallbacks.callback(eq(AfterConvertCallback.class), any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
     }
 
     private List<Hit<EntityAsMap>> createResultHits(int size) {
         List<Hit<EntityAsMap>> results = new ArrayList<>();
         for (int index = 0; index < size; index++) {
             String id = String.valueOf(index);
-            results.add(Hit.of(builder -> builder.index("testEntity").id(id).version(1L)));
+            long primaryTerm = index + 1;
+            results.add(Hit.of(builder -> builder.index("testEntity")
+                    .id(id)
+                    .version(1L)
+                    .seqNo(primaryTerm)
+                    .primaryTerm(primaryTerm)));
         }
         return results;
     }
@@ -118,6 +150,27 @@ class ExtendedElasticsearchTemplateTest {
         // Verify that iterator has only one result
         assertThat(iterator.next()).isNotNull();
         assertThat(iterator).isExhausted();
+
+        verify(client).clearScroll(any(ClearScrollRequest.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldReturnAnIteratorWhenSearchingForEmptyStream() throws IOException {
+        // Given
+        SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
+        when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
+        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(0))));
+        when(response.scrollId()).thenReturn("Empty");
+
+        Query query = new NativeQueryBuilder()
+                .withPageable(Pageable.ofSize(100))
+                .withMaxResults(200)
+                .build();
+        // When
+        SearchHitsIterator<TestEntity> iterator = extendedElasticsearchTemplate.searchForStream(query, 100, TestEntity.class);
+        // Then
+        assertThat(iterator).isNotNull().isExhausted();
 
         verify(client).clearScroll(any(ClearScrollRequest.class));
     }

@@ -4,7 +4,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.erhlc.AbstractElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.client.erhlc.ElasticsearchRestTemplate;
@@ -15,6 +14,7 @@ import org.springframework.data.elasticsearch.core.RefreshPolicy;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
 import org.springframework.data.elasticsearch.support.HttpHeaders;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -27,29 +27,16 @@ public class ElasticsearchRestTemplateConfiguration extends AbstractElasticsearc
 
     @Override
     @Bean
-    public RestHighLevelClient elasticsearchClient() {
+    public @Nonnull RestHighLevelClient elasticsearchClient() {
 
         String elasticsearchHostPort = clusterConnectionInfo.getHost() + ':' + clusterConnectionInfo.getHttpPort();
 
         ClientConfiguration.TerminalClientConfigurationBuilder configurationBuilder = ClientConfiguration.builder()
                 .connectedTo(elasticsearchHostPort);
 
-        String proxy = System.getenv("DATAES_ELASTICSEARCH_PROXY");
-
-        if (proxy != null) {
-            configurationBuilder = configurationBuilder.withProxy(proxy);
-        }
-
         if (clusterConnectionInfo.isUseSsl()) {
             configurationBuilder = ((ClientConfiguration.MaybeSecureClientConfigurationBuilder) configurationBuilder)
                     .usingSsl();
-        }
-
-        String user = System.getenv("DATAES_ELASTICSEARCH_USER");
-        String password = System.getenv("DATAES_ELASTICSEARCH_PASSWORD");
-
-        if (hasText(user) && hasText(password)) {
-            configurationBuilder.withBasicAuth(user, password);
         }
 
         HttpHeaders defaultHeaders = new HttpHeaders();
@@ -66,22 +53,10 @@ public class ElasticsearchRestTemplateConfiguration extends AbstractElasticsearc
     }
 
     @Override
-    public ElasticsearchOperations elasticsearchOperations(ElasticsearchConverter elasticsearchConverter,
-                                                           RestHighLevelClient elasticsearchClient) {
+    public @Nonnull ElasticsearchOperations elasticsearchOperations(@Nonnull ElasticsearchConverter elasticsearchConverter,
+                                                                    @Nonnull RestHighLevelClient elasticsearchClient) {
 
-        ElasticsearchRestTemplate template = new ElasticsearchRestTemplate(elasticsearchClient, elasticsearchConverter) {
-            @Override
-            public <T> T execute(ClientCallback<T> callback) {
-                try {
-                    return super.execute(callback);
-                } catch (DataAccessResourceFailureException e) {
-                    try {
-                        Thread.sleep(1_000);
-                    } catch (InterruptedException ignored) {}
-                    return super.execute(callback);
-                }
-            }
-        };
+        ElasticsearchRestTemplate template = new ElasticsearchRestTemplate(elasticsearchClient, elasticsearchConverter);
         template.setRefreshPolicy(refreshPolicy());
 
         return template;

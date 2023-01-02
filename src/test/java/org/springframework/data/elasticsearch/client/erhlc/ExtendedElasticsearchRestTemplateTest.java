@@ -1,6 +1,5 @@
 package org.springframework.data.elasticsearch.client.erhlc;
 
-import co.elastic.clients.elasticsearch.core.ClearScrollRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -13,13 +12,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.SearchHitsIterator;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +34,9 @@ class ExtendedElasticsearchRestTemplateTest {
     static class TestEntity{
         @Id
         private String id;
+
+        @Version
+        private Long version;
     }
 
     @Mock

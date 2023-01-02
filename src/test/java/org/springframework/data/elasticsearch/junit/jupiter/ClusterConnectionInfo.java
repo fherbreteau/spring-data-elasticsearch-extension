@@ -16,8 +16,8 @@ public class ClusterConnectionInfo {
         return new Builder();
     }
 
-    private ClusterConnectionInfo(String host, int httpPort,
-                                  boolean useSsl, @Nullable ElasticsearchContainer elasticsearchContainer) {
+    private ClusterConnectionInfo(String host, int httpPort, boolean useSsl,
+                                  @Nullable ElasticsearchContainer elasticsearchContainer) {
         this.host = host;
         this.httpPort = httpPort;
         this.useSsl = useSsl;

@@ -9,6 +9,7 @@ import org.springframework.lang.Nullable;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.Collections;
@@ -84,7 +85,7 @@ public class ClusterConnection implements ExtensionContext.Store.CloseableResour
                 LOGGER.warn("DATAES_ELASTICSEARCH_PORT does not contain a number");
             }
 
-            return ClusterConnectionInfo.builder().withHostAndPort(host, port).build();
+            return ClusterConnectionInfo.builder().withHostAndPort(host, port).useSsl(false).build();
         }
 
         return startElasticsearchContainer();
@@ -118,6 +119,7 @@ public class ClusterConnection implements ExtensionContext.Store.CloseableResour
         return null;
     }
 
+    @Nonnull
     private DockerImageName getDockerImageName(Map<String, String> testcontainersProperties) {
 
         String imageName = testcontainersProperties.get(TESTCONTAINER_IMAGE_NAME);
@@ -176,7 +178,7 @@ public class ClusterConnection implements ExtensionContext.Store.CloseableResour
 
     private static class SpringDataElasticsearchContainer extends ElasticsearchContainer {
 
-        public SpringDataElasticsearchContainer(DockerImageName dockerImageName) {
+        public SpringDataElasticsearchContainer(@Nonnull DockerImageName dockerImageName) {
             super(dockerImageName);
         }
 

@@ -24,31 +24,15 @@ public class ElasticsearchTemplateConfiguration extends ElasticsearchConfigurati
         ClientConfiguration.TerminalClientConfigurationBuilder configurationBuilder = ClientConfiguration.builder()
                 .connectedTo(elasticsearchHostPort);
 
-        String proxy = System.getenv("DATAES_ELASTICSEARCH_PROXY");
-
-        if (proxy != null) {
-            configurationBuilder = configurationBuilder.withProxy(proxy);
-        }
-
         if (clusterConnectionInfo.isUseSsl()) {
             configurationBuilder = ((ClientConfiguration.MaybeSecureClientConfigurationBuilder) configurationBuilder)
                     .usingSsl();
         }
 
-        String user = System.getenv("DATAES_ELASTICSEARCH_USER");
-        String password = System.getenv("DATAES_ELASTICSEARCH_PASSWORD");
-
-        if (hasText(user) && hasText(password)) {
-            configurationBuilder.withBasicAuth(user, password);
-        }
-
-        // noinspection UnnecessaryLocalVariable
-        ClientConfiguration clientConfiguration = configurationBuilder //
+        return configurationBuilder //
                 .withConnectTimeout(Duration.ofSeconds(20)) //
                 .withSocketTimeout(Duration.ofSeconds(20)) //
                 .build();
-
-        return clientConfiguration;
     }
 
     @Override
