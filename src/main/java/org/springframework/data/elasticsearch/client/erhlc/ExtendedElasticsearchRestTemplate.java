@@ -60,15 +60,12 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
 
         Assert.notNull(query.getPageable(), "pageable of query must not be null.");
 
-        SearchRequest searchRequest = requestFactory.searchRequest(query, clazz, index);
-        searchRequest.scroll(TimeValue.timeValueMillis(scrollTimeInMillis));
+        SearchRequest request = requestFactory.searchRequest(query, clazz, index);
+        request.scroll(TimeValue.timeValueMillis(scrollTimeInMillis));
 
-        SearchResponse response = execute(client -> client.search(searchRequest, RequestOptions.DEFAULT));
+        SearchResponse response = execute(client -> client.search(request, RequestOptions.DEFAULT));
 
-        ReadDocumentCallback<T> documentCallback = new ReadDocumentCallback<>(elasticsearchConverter, clazz, index);
-        SearchDocumentResponseCallback<SearchScrollHits<T>> callback = new ReadSearchScrollDocumentResponseCallback<>(clazz,
-                index);
-        return callback.doWith(SearchDocumentResponseBuilder.from(response, getEntityCreator(documentCallback)));
+        return getSearchScrollHits(clazz, index, response);
     }
 
     @Override
@@ -78,6 +75,12 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
         request.scroll(TimeValue.timeValueMillis(scrollTimeInMillis));
 
         SearchResponse response = execute(client -> client.scroll(request, RequestOptions.DEFAULT));
+
+        return getSearchScrollHits(clazz, index, response);
+    }
+
+    private <T> SearchScrollHits<T> getSearchScrollHits(Class<T> clazz, IndexCoordinates index,
+                                                        SearchResponse response) {
 
         ReadDocumentCallback<T> documentCallback = new ReadDocumentCallback<>(elasticsearchConverter, clazz, index);
         SearchDocumentResponseCallback<SearchScrollHits<T>> callback = new ReadSearchScrollDocumentResponseCallback<>(clazz,
@@ -138,7 +141,7 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
 
         RuntimeException runtimeException = exception instanceof RuntimeException rtException ? rtException
                 : new RuntimeException(exception.getMessage(), exception);
-        RuntimeException potentiallyTranslatedException = exceptionTranslator .translateExceptionIfPossible(runtimeException);
+        RuntimeException potentiallyTranslatedException = exceptionTranslator.translateExceptionIfPossible(runtimeException);
 
         return potentiallyTranslatedException != null ? potentiallyTranslatedException : runtimeException;
     }

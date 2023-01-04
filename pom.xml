@@ -327,6 +327,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -364,10 +365,11 @@
                         <configuration>
                             <mutationThreshold>60</mutationThreshold>
                             <targetTests>
-                                <targetTest>**Test</targetTest>
+                                <param>org.springframework.data.elasticsearch.core.*</param>
+                                <param>org.springframework.data.elasticsearch.client.*</param>
                             </targetTests>
                             <outputFormats>
-                                <outputFormat>xml</outputFormat>
+                                <outputFormat>html</outputFormat>
                             </outputFormats>
                         </configuration>
                     </plugin>

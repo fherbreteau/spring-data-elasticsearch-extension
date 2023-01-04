@@ -30,7 +30,8 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOperations, ApplicationContextAware {
 
     protected final ElasticsearchConverter elasticsearchConverter;
-    @Nullable protected EntityCallbacks entityCallbacks;
+    @Nullable
+    protected EntityCallbacks entityCallbacks;
 
     protected AbstractExtendedSearchTemplate() {
         this(null);
@@ -63,20 +64,21 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     /**
      * Set the {@link EntityCallbacks} instance to use when invoking {@link EntityCallbacks callbacks} like the
      * {@link org.springframework.data.elasticsearch.core.event.BeforeConvertCallback}.
-     * <p />
+     * <p/>
      * Overrides potentially existing {@link EntityCallbacks}.
      *
      * @param entityCallbacks must not be {@literal null}.
      * @throws IllegalArgumentException if the given instance is {@literal null}.
      * @since 4.0
      */
-    public void setEntityCallbacks(EntityCallbacks entityCallbacks) {
+    public void setEntityCallbacks(@Nullable EntityCallbacks entityCallbacks) {
 
         Assert.notNull(entityCallbacks, "entityCallbacks must not be null");
 
         this.entityCallbacks = entityCallbacks;
     }
 
+    @Nonnull
     @Override
     public <T> SearchHitsIterator<T> searchForStream(@Nullable Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
         Assert.notNull(query, "query must not be null");
@@ -92,22 +94,22 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         }
 
         return new SkippingSearchHitsIterator<>(maxCount, fromIndex,
-            searchScrollStart(scrollTimeInMillis, query, clazz, index),
-            scrollId -> searchScrollContinue(scrollId, scrollTimeInMillis, clazz, index),
-            this::searchScrollClear);
+                searchScrollStart(scrollTimeInMillis, query, clazz, index),
+                scrollId -> searchScrollContinue(scrollId, scrollTimeInMillis, clazz, index),
+                this::searchScrollClear);
     }
 
     /*
      * internal use only, not for public API
      */
     public abstract <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
-                                                                 IndexCoordinates index);
+                                                              IndexCoordinates index);
 
     /*
      * internal use only, not for public API
      */
     public abstract <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis,
-                                                                    Class<T> clazz, IndexCoordinates index);
+                                                                 Class<T> clazz, IndexCoordinates index);
 
     /*
      * internal use only, not for public API
@@ -136,33 +138,31 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         ElasticsearchPersistentEntity<?> persistentEntity = elasticsearchConverter.getMappingContext()
                 .getPersistentEntity(entity.getClass());
 
-        if (persistentEntity != null) {
-            PersistentPropertyAccessor<Object> propertyAccessor = persistentEntity.getPropertyAccessor(entity);
-            ElasticsearchPersistentProperty idProperty = persistentEntity.getIdProperty();
+        assert persistentEntity != null;
+        PersistentPropertyAccessor<Object> propertyAccessor = persistentEntity.getPropertyAccessor(entity);
+        ElasticsearchPersistentProperty idProperty = persistentEntity.getIdProperty();
 
-            // Only deal with text because ES generated Ids are strings!
-            if (indexedObjectInformation.getId() != null && idProperty != null
-                    && idProperty.getType().isAssignableFrom(String.class)) {
-                propertyAccessor.setProperty(idProperty, indexedObjectInformation.getId());
-            }
-
-            if (indexedObjectInformation.getSeqNo() != null && indexedObjectInformation.getPrimaryTerm() != null
-                    && persistentEntity.hasSeqNoPrimaryTermProperty()) {
-                ElasticsearchPersistentProperty seqNoPrimaryTermProperty = persistentEntity.getSeqNoPrimaryTermProperty();
-                assert seqNoPrimaryTermProperty != null;
-                propertyAccessor.setProperty(seqNoPrimaryTermProperty,
-                        new SeqNoPrimaryTerm(indexedObjectInformation.getSeqNo(), indexedObjectInformation.getPrimaryTerm()));
-            }
-
-            if (indexedObjectInformation.getVersion() != null && persistentEntity.hasVersionProperty()) {
-                ElasticsearchPersistentProperty versionProperty = persistentEntity.getVersionProperty();
-                assert versionProperty != null;
-                propertyAccessor.setProperty(versionProperty, indexedObjectInformation.getVersion());
-            }
-
-            return (T) propertyAccessor.getBean();
+        // Only deal with text because ES generated Ids are strings!
+        if (indexedObjectInformation.getId() != null && idProperty != null
+                && idProperty.getType().isAssignableFrom(String.class)) {
+            propertyAccessor.setProperty(idProperty, indexedObjectInformation.getId());
         }
-        return entity;
+
+        if (indexedObjectInformation.getSeqNo() != null && indexedObjectInformation.getPrimaryTerm() != null
+                && persistentEntity.hasSeqNoPrimaryTermProperty()) {
+            ElasticsearchPersistentProperty seqNoPrimaryTermProperty = persistentEntity.getSeqNoPrimaryTermProperty();
+            assert seqNoPrimaryTermProperty != null;
+            propertyAccessor.setProperty(seqNoPrimaryTermProperty,
+                    new SeqNoPrimaryTerm(indexedObjectInformation.getSeqNo(), indexedObjectInformation.getPrimaryTerm()));
+        }
+
+        if (indexedObjectInformation.getVersion() != null && persistentEntity.hasVersionProperty()) {
+            ElasticsearchPersistentProperty versionProperty = persistentEntity.getVersionProperty();
+            assert versionProperty != null;
+            propertyAccessor.setProperty(versionProperty, indexedObjectInformation.getVersion());
+        }
+
+        return (T) propertyAccessor.getBean();
     }
 
     protected <T> SearchDocumentResponse.EntityCreator<T> getEntityCreator(ReadDocumentCallback<T> documentCallback) {
@@ -189,8 +189,8 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
 
     // region Document callbacks
     protected interface DocumentCallback<T> {
-        @Nullable
-        T doWith(@Nullable Document document);
+        @Nonnull
+        T doWith(@Nonnull Document document);
     }
 
     protected class ReadDocumentCallback<T> implements DocumentCallback<T> {
@@ -208,12 +208,8 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             this.index = index;
         }
 
-        @Nullable
-        public T doWith(@Nullable Document document) {
-
-            if (document == null) {
-                return null;
-            }
+        @Nonnull
+        public T doWith(@Nonnull Document document) {
             Document documentAfterLoad = maybeCallbackAfterLoad(document, type, index);
 
             T entity = reader.read(type, documentAfterLoad);
