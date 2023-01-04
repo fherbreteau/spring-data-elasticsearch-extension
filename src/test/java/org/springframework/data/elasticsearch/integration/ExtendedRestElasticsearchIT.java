@@ -1,8 +1,9 @@
-package org.springframework.data.elasticsearch.client.erhlc;
+package org.springframework.data.elasticsearch.integration;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.client.erhlc.ExtendedElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.junit.jupiter.ElasticsearchRestTemplateConfiguration;
 import org.springframework.data.elasticsearch.junit.jupiter.SpringIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;

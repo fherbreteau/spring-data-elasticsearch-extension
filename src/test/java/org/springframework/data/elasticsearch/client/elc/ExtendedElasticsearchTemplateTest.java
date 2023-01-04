@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
+import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
 import co.elastic.clients.json.SimpleJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,25 +93,15 @@ class ExtendedElasticsearchTemplateTest {
         return results;
     }
 
-    @SuppressWarnings("unchecked")
-    private ScrollResponse<EntityAsMap> createScrollResponse(int size, String scrollId) {
-        ScrollResponse<EntityAsMap> response = mock(ScrollResponse.class);
-        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(size))));
-        when(response.scrollId()).thenReturn(scrollId);
-        return response;
-    }
-
     @Test
     @SuppressWarnings("unchecked")
     void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
         // Given
         SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
-        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(1))));
+        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(1))
+                .total(thBuilder -> thBuilder.value(1).relation(TotalHitsRelation.Eq))));
         when(response.scrollId()).thenReturn("ScrollId");
-
-        ScrollResponse<EntityAsMap> terminalResponse = createScrollResponse(0, "Empty");
-        when(client.scroll(any(ScrollRequest.class), eq(EntityAsMap.class))).thenReturn(terminalResponse);
 
         Query query = new NativeQueryBuilder()
                 .withPageable(Pageable.ofSize(100))
@@ -124,6 +115,8 @@ class ExtendedElasticsearchTemplateTest {
         assertThat(iterator).isExhausted();
 
         verify(client).clearScroll(any(ClearScrollRequest.class));
+        verify(entityCallbacks).callback(eq(AfterConvertCallback.class), any(), any(), any());
+        verify(entityCallbacks).callback(eq(AfterLoadCallback.class), any(), any(), any());
     }
 
     @Test
@@ -132,26 +125,28 @@ class ExtendedElasticsearchTemplateTest {
         // Given
         SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
-        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(100))));
+        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(51))
+                .total(thBuilder -> thBuilder.value(51).relation(TotalHitsRelation.Eq))));
         when(response.scrollId()).thenReturn("ScrollId");
-
-        ScrollResponse<EntityAsMap> continuedResponse = createScrollResponse(1, "ContinuedScroll");
-        ScrollResponse<EntityAsMap> terminalResponse = createScrollResponse(0, "Empty");
-        when(client.scroll(any(ScrollRequest.class), eq(EntityAsMap.class))).thenReturn(continuedResponse, terminalResponse);
 
         Query query = new NativeQueryBuilder()
                 .withPageable(Pageable.ofSize(100))
-                .withMaxResults(200)
                 .build();
         // When
-        SearchHitsIterator<TestEntity> iterator = extendedElasticsearchTemplate.searchForStream(query, 100, TestEntity.class);
+        SearchHitsIterator<TestEntity> iterator = extendedElasticsearchTemplate.searchForStream(query, 50, TestEntity.class);
         // Then
         assertThat(iterator).isNotNull().hasNext();
         // Verify that iterator has only one result
-        assertThat(iterator.next()).isNotNull();
+        assertThat(iterator.next()).isNotNull()
+                .extracting("content").isNotNull()
+                .isExactlyInstanceOf(TestEntity.class)
+                .extracting("id", "primaryTerm")
+                .allSatisfy(val -> assertThat(val).isNotNull());
         assertThat(iterator).isExhausted();
 
         verify(client).clearScroll(any(ClearScrollRequest.class));
+        verify(entityCallbacks, atLeast(1)).callback(eq(AfterConvertCallback.class), any(), any(), any());
+        verify(entityCallbacks, atLeast(1)).callback(eq(AfterLoadCallback.class), any(), any(), any());
     }
 
     @Test
@@ -173,6 +168,13 @@ class ExtendedElasticsearchTemplateTest {
         assertThat(iterator).isNotNull().isExhausted();
 
         verify(client).clearScroll(any(ClearScrollRequest.class));
+    }
+
+    @Test
+    void shouldProtectAgainstNullCallbacks() {
+        assertThatThrownBy(() -> extendedElasticsearchTemplate.setEntityCallbacks(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("entityCallbacks must not be null");
     }
 
     @Test

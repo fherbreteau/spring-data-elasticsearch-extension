@@ -1,5 +1,6 @@
 package org.springframework.data.elasticsearch.client.erhlc;
 
+import org.apache.lucene.search.TotalHits;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -19,9 +20,9 @@ import org.springframework.data.elasticsearch.core.SearchHitsIterator;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.io.IOException;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -49,8 +50,8 @@ class ExtendedElasticsearchRestTemplateTest {
         extendedElasticsearchRestTemplate = new ExtendedElasticsearchRestTemplate(client);
     }
 
-    private SearchHit createSearchHit() {
-        SearchHit searchHit = new SearchHit(0);
+    private SearchHit createSearchHit(int index) {
+        SearchHit searchHit = new SearchHit(index, "" + index, null, Map.of(), Map.of());
         searchHit.version(1L);
         return searchHit;
     }
@@ -58,28 +59,27 @@ class ExtendedElasticsearchRestTemplateTest {
     private SearchHit[] createSearchHits(int size) {
         SearchHit[] result = new SearchHit[size];
         for (int index = 0; index < size; index++) {
-            result[index] = createSearchHit();
+            result[index] = createSearchHit(index);
         }
         return result;
     }
 
-    private SearchResponse createResponse(int size, String scrollId) {
+    private SearchResponse createResponse(int size, String scrollId, long totalHits) {
         SearchResponse response = mock(SearchResponse.class);
         SearchHits searchHits = mock(SearchHits.class);
         when(response.getHits()).thenReturn(searchHits);
         when(response.getScrollId()).thenReturn(scrollId);
         when(searchHits.getHits()).thenReturn(createSearchHits(size));
         when(searchHits.iterator()).thenCallRealMethod();
+        when(searchHits.getTotalHits()).thenReturn(new TotalHits(totalHits, TotalHits.Relation.EQUAL_TO));
         return response;
     }
 
     @Test
     void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
         // Given
-        SearchResponse initialResponse = createResponse(1, "ScrollId");
+        SearchResponse initialResponse = createResponse(1, "ScrollId", 1);
         when(client.search(any(), eq(RequestOptions.DEFAULT))).thenReturn(initialResponse);
-        SearchResponse terminalResponse = createResponse(0, "Empty");
-        when(client.scroll(any(), eq(RequestOptions.DEFAULT))).thenReturn(terminalResponse);
 
         Query query = new NativeSearchQueryBuilder()
                 .withPageable(Pageable.ofSize(100))
@@ -89,7 +89,11 @@ class ExtendedElasticsearchRestTemplateTest {
         // Then
         assertThat(iterator).isNotNull().hasNext();
         // Verify that iterator has only one result
-        assertThat(iterator.next()).isNotNull();
+        assertThat(iterator.next()).isNotNull()
+                .extracting("content").isNotNull()
+                .isExactlyInstanceOf(TestEntity.class)
+                .extracting("id", "version")
+                .allSatisfy(val -> assertThat(val).isNotNull());
         assertThat(iterator).isExhausted();
 
         verify(client).clearScroll(any(), eq(RequestOptions.DEFAULT));
@@ -98,12 +102,11 @@ class ExtendedElasticsearchRestTemplateTest {
     @Test
     void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndex() throws IOException {
         // Given
-        SearchResponse initialResponse = createResponse(100, "ScrollId");
+        SearchResponse initialResponse = createResponse(100, "ScrollId", 101);
         when(client.search(any(), eq(RequestOptions.DEFAULT))).thenReturn(initialResponse);
 
-        SearchResponse continuedResponse = createResponse(1, "ContinuedScrollId");
-        SearchResponse terminalResponse = createResponse(0, "Empty");
-        when(client.scroll(any(), eq(RequestOptions.DEFAULT))).thenReturn(continuedResponse, terminalResponse);
+        SearchResponse continuedResponse = createResponse(1, "ContinuedScrollId", 101);
+        when(client.scroll(any(), eq(RequestOptions.DEFAULT))).thenReturn(continuedResponse);
         when(client.clearScroll(any(), eq(RequestOptions.DEFAULT))).thenThrow(IOException.class);
 
         Query query = new NativeSearchQueryBuilder()
