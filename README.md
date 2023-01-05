@@ -11,4 +11,8 @@
 | [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=fherbreteau_spring-data-elasticsearch-extension&metric=sqale_index)](https://sonarcloud.io/dashboard?id=fherbreteau_spring-data-elasticsearch-extension)            |
 | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=fherbreteau_spring-data-elasticsearch-extension&metric=coverage)](https://sonarcloud.io/dashboard?id=fherbreteau_spring-data-elasticsearch-extension)                     |
 
+| Snyk                                                                                                                                                                                           |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [![Known Vulnerabilities](https://snyk.io/test/github/fherbreteau/spring-data-elasticsearch-extension/badge.svg)](https://snyk.io/test/github/fherbreteau/spring-data-elasticsearch-extension) |
+
 Proposed extension for Spring Data Elasticsearch : Add possibility to skip element in stream search.
