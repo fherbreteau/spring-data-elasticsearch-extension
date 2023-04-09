@@ -27,6 +27,7 @@ import org.springframework.data.mapping.callback.EntityCallbacks;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -52,6 +53,10 @@ class ExtendedElasticsearchTemplateTest {
         public SeqNoPrimaryTerm getPrimaryTerm() {
             return primaryTerm;
         }
+
+        public void setPrimaryTerm(SeqNoPrimaryTerm primaryTerm) {
+            this.primaryTerm = primaryTerm;
+        }
     }
 
     @Mock
@@ -62,6 +67,11 @@ class ExtendedElasticsearchTemplateTest {
 
     @Mock
     private EntityCallbacks entityCallbacks;
+
+    @Mock
+    private SearchResponse<EntityAsMap> response;
+    @Mock
+    private ScrollResponse<EntityAsMap> continuation;
 
     private ExtendedElasticsearchTemplate extendedElasticsearchTemplate;
 
@@ -82,10 +92,9 @@ class ExtendedElasticsearchTemplateTest {
     private List<Hit<EntityAsMap>> createResultHits(int size) {
         List<Hit<EntityAsMap>> results = new ArrayList<>();
         for (int index = 0; index < size; index++) {
-            String id = String.valueOf(index);
             long primaryTerm = index + 1;
-            results.add(Hit.of(builder -> builder.index("testEntity")
-                    .id(id)
+            results.add(Hit.of(builder -> builder.index("test")
+                    .id(UUID.randomUUID().toString())
                     .version(1L)
                     .seqNo(primaryTerm)
                     .primaryTerm(primaryTerm)));
@@ -94,10 +103,8 @@ class ExtendedElasticsearchTemplateTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void shouldReturnAnIteratorWhenSearchingForStream() throws IOException {
         // Given
-        SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
         when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(1))
                 .total(thBuilder -> thBuilder.value(1).relation(TotalHitsRelation.Eq))));
@@ -120,10 +127,8 @@ class ExtendedElasticsearchTemplateTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndex() throws IOException {
         // Given
-        SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
         when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(51))
                 .total(thBuilder -> thBuilder.value(51).relation(TotalHitsRelation.Eq))));
@@ -150,10 +155,8 @@ class ExtendedElasticsearchTemplateTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void shouldReturnAnIteratorWhenSearchingForEmptyStream() throws IOException {
         // Given
-        SearchResponse<EntityAsMap> response = mock(SearchResponse.class);
         when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
         when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(0))));
         when(response.scrollId()).thenReturn("Empty");
@@ -166,6 +169,35 @@ class ExtendedElasticsearchTemplateTest {
         SearchHitsIterator<TestEntity> iterator = extendedElasticsearchTemplate.searchForStream(query, 100, TestEntity.class);
         // Then
         assertThat(iterator).isNotNull().isExhausted();
+
+        verify(client).clearScroll(any(ClearScrollRequest.class));
+    }
+
+    @Test
+    void shouldReturnAnIteratorWhenSearchingForStreamFromASpecificIndexWithContinuation() throws IOException {
+        // Given
+        when(client.search(any(SearchRequest.class), eq(EntityAsMap.class))).thenReturn(response);
+        when(response.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(100))
+                .total(thBuilder -> thBuilder.value(101).relation(TotalHitsRelation.Eq))));
+        when(response.scrollId()).thenReturn("ScrollId");
+        when(client.scroll(any(ScrollRequest.class), eq(EntityAsMap.class))).thenReturn(continuation);
+        when(continuation.hits()).thenReturn(HitsMetadata.of(builder -> builder.hits(createResultHits(1))
+                .total(thbuilder -> thbuilder.value(101).relation(TotalHitsRelation.Eq))));
+        when(continuation.scrollId()).thenReturn("ContinuedScrollId");
+        when(client.clearScroll(any(ClearScrollRequest.class)))
+                .thenReturn(ClearScrollResponse.of(builder -> builder.succeeded(true).numFreed(2)));
+
+        Query query = new NativeQueryBuilder()
+                .withPageable(Pageable.ofSize(100))
+                .build();
+
+        // When
+        SearchHitsIterator<TestEntity> iterator = extendedElasticsearchTemplate.searchForStream(query, 100, TestEntity.class);
+        // Then
+        assertThat(iterator).isNotNull().hasNext();
+        // Verify that iterator has only one result
+        assertThat(iterator.next()).isNotNull();
+        assertThat(iterator).isExhausted();
 
         verify(client).clearScroll(any(ClearScrollRequest.class));
     }

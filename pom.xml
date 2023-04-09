@@ -368,6 +368,13 @@
                                 <param>org.springframework.data.elasticsearch.core.*</param>
                                 <param>org.springframework.data.elasticsearch.client.*</param>
                             </targetTests>
+                            <avoidCallsTo>
+                                <avoidCallsTo>java.util.logging</avoidCallsTo>
+                                <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                                <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                                <avoidCallsTo>org.springframework.util.Assert</avoidCallsTo>
+                            </avoidCallsTo>
                             <outputFormats>
                                 <outputFormat>html</outputFormat>
                             </outputFormats>

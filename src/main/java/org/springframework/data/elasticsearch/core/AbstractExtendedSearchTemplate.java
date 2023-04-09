@@ -78,6 +78,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         this.entityCallbacks = entityCallbacks;
     }
 
+    @SuppressWarnings("java:S4449")
     @Nonnull
     @Override
     public <T> SearchHitsIterator<T> searchForStream(@Nullable Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
@@ -88,10 +89,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
             scrollTime = Duration.ofMinutes(1);
         }
         long scrollTimeInMillis = scrollTime.toMillis();
-        int maxCount = 0;
-        if (query.getMaxResults() != null) {
-            maxCount = query.getMaxResults();
-        }
+        int maxCount = query.getMaxResults() != null ? query.getMaxResults() : 0;
 
         return new SkippingSearchHitsIterator<>(maxCount, fromIndex,
                 searchScrollStart(scrollTimeInMillis, query, clazz, index),
@@ -132,7 +130,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         return elasticsearchConverter.getMappingContext().getRequiredPersistentEntity(clazz).getIndexCoordinates();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "java:S4449"})
     protected <T> T updateIndexedObject(T entity, IndexedObjectInformation indexedObjectInformation) {
 
         ElasticsearchPersistentEntity<?> persistentEntity = elasticsearchConverter.getMappingContext()

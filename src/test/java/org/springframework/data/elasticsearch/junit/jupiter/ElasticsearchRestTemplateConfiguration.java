@@ -19,7 +19,7 @@ import java.time.Duration;
 
 import static org.springframework.util.StringUtils.hasText;
 
-@Deprecated
+@Deprecated(since = "1.0")
 @Configuration
 public class ElasticsearchRestTemplateConfiguration extends AbstractElasticsearchConfiguration implements ExtendedRestSearchConfiguration {
     @Autowired
