@@ -28,7 +28,7 @@
         <assertj.version>3.24.2</assertj.version>
         <log4j.version>2.20.0</log4j.version>
         <slf4j.version>2.0.6</slf4j.version>
-        <logback.version>1.4.6</logback.version>
+        <logback.version>1.4.7</logback.version>
         <testcontainers.version>1.17.6</testcontainers.version>
 
         <!-- Tools dependencies -->
