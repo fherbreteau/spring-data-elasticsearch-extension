@@ -20,7 +20,7 @@
         <elasticsearch-rhlc.version>7.17.10</elasticsearch-rhlc.version>
 
         <!-- CVE Dependencies Fix -->
-        <jackson-cbor.version>2.15.0</jackson-cbor.version>
+        <jackson-cbor.version>2.15.2</jackson-cbor.version>
         <snakeyaml.version>2.0</snakeyaml.version>
 
         <!-- test Dependencies versions -->
