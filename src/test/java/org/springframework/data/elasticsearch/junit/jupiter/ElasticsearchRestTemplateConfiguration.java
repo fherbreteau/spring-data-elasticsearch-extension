@@ -17,9 +17,7 @@ import org.springframework.data.elasticsearch.support.HttpHeaders;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 
-import static org.springframework.util.StringUtils.hasText;
-
-@Deprecated(since = "1.0")
+@Deprecated(since = "0.0.1")
 @Configuration
 public class ElasticsearchRestTemplateConfiguration extends AbstractElasticsearchConfiguration implements ExtendedRestSearchConfiguration {
     @Autowired

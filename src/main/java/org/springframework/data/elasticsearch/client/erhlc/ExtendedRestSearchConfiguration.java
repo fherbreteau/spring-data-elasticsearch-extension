@@ -6,10 +6,10 @@ import org.springframework.data.elasticsearch.core.ExtendedSearchOperations;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
 
 /**
- * @since 0.1
- * @deprecated since 1.0
+ * @since 0.0.1
+ * @deprecated since 0.0.1
  */
-@Deprecated(since = "1.0")
+@Deprecated(since = "0.0.1")
 public interface ExtendedRestSearchConfiguration {
 
     /**

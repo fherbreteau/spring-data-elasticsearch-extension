@@ -21,10 +21,10 @@ import java.util.List;
 
 /**
  * ElasticsearchRestTemplate
- * @since 0.1
- * @deprecated since 1.0
+ * @since 0.0.1
+ * @deprecated since 0.0.1
  */
-@Deprecated(since = "1.0")
+@Deprecated(since = "0.0.1")
 public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTemplate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedElasticsearchRestTemplate.class);
@@ -60,7 +60,7 @@ public class ExtendedElasticsearchRestTemplate extends AbstractExtendedSearchTem
 
         Assert.notNull(query.getPageable(), "pageable of query must not be null.");
 
-        SearchRequest request = requestFactory.searchRequest(query, clazz, index);
+        SearchRequest request = requestFactory.searchRequest(query, routingResolver.getRouting(), clazz, index);
         request.scroll(TimeValue.timeValueMillis(scrollTimeInMillis));
 
         SearchResponse response = execute(client -> client.search(request, RequestOptions.DEFAULT));

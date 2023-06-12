@@ -302,7 +302,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>${surefire.jacoco.args}</argLine>
+                    <argLine>@{surefire.jacoco.args}</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -310,7 +310,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>${failsafe.jacoco.args}</argLine>
+                    <argLine>@{failsafe.jacoco.args}</argLine>
                 </configuration>
                 <executions>
                     <execution>
