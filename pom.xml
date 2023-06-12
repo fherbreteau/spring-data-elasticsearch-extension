@@ -25,8 +25,8 @@
         <jakarta.json.version>2.1.2</jakarta.json.version>
 
         <!-- test Dependencies versions -->
-        <junit5.version>5.9.2</junit5.version>
-        <mockito.version>4.11.0</mockito.version>
+        <junit5.version>5.9.3</junit5.version>
+        <mockito.version>5.3.1</mockito.version>
         <assertj.version>3.24.2</assertj.version>
         <log4j.version>2.20.0</log4j.version>
         <slf4j.version>2.0.7</slf4j.version>
@@ -39,7 +39,7 @@
         <checkstyle-maven.version>3.3.0</checkstyle-maven.version>
         <checkstyle.version>10.9.3</checkstyle.version>
         <surefire.version>3.1.0</surefire.version>
-        <pitest.version>1.12.0</pitest.version>
+        <pitest.version>1.14.1</pitest.version>
 
         <!-- Sonar configuration properties -->
         <sonar.organization>fherbreteau</sonar.organization>
