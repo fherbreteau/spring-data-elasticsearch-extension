@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
@@ -65,8 +66,8 @@ class ExtendedElasticsearchTemplateTest {
     @Mock
     private ApplicationContext context;
 
-    @Mock
-    private EntityCallbacks entityCallbacks;
+    @Spy
+    private EntityCallbacks entityCallbacks = EntityCallbacks.create();
 
     @Mock
     private SearchResponse<EntityAsMap> response;
@@ -84,9 +85,6 @@ class ExtendedElasticsearchTemplateTest {
         extendedElasticsearchTemplate = new ExtendedElasticsearchTemplate(client);
         extendedElasticsearchTemplate.setEntityCallbacks(entityCallbacks);
         extendedElasticsearchTemplate.setApplicationContext(context);
-
-        lenient().when(entityCallbacks.callback(eq(AfterLoadCallback.class), any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
-        lenient().when(entityCallbacks.callback(eq(AfterConvertCallback.class), any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
     }
 
     private List<Hit<EntityAsMap>> createResultHits(int size) {
