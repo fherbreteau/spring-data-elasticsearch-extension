@@ -20,8 +20,9 @@
         <elasticsearch-rhlc.version>7.17.10</elasticsearch-rhlc.version>
 
         <!-- CVE Dependencies Fix -->
-        <jackson-cbor.version>2.15.2</jackson-cbor.version>
+        <jackson.cbor.version>2.15.2</jackson.cbor.version>
         <snakeyaml.version>2.0</snakeyaml.version>
+        <jakarta.json.version>2.1.2</jakarta.json.version>
 
         <!-- test Dependencies versions -->
         <junit5.version>5.9.3</junit5.version>
@@ -77,14 +78,14 @@
         <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
-            <version>2.1.2</version>
+            <version>${jakarta.json.version}</version>
         </dependency>
 
         <!-- Jackson Dataformat CBOR CVE Fix -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-cbor</artifactId>
-            <version>${jackson-cbor.version}</version>
+            <version>${jackson.cbor.version}</version>
         </dependency>
 
         <!-- SnakeYaml CVE Fix -->
