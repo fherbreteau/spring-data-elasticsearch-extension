@@ -15,6 +15,14 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Implementation of {@link org.springframework.data.elasticsearch.core.ExtendedSearchOperations} using the new
+ * Elasticsearch client.
+ *
+ * @author Peter-Josef Meisch
+ * @author Hamid Rahimi
+ * @since 4.4
+ */
 public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplate {
 
     private final ElasticsearchClient client;
@@ -50,7 +58,7 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
         Assert.notNull(query, "query must not be null");
         Assert.notNull(query.getPageable(), "pageable of query must not be null.");
 
-        SearchRequest request = requestConverter.searchRequest(query, clazz, index, false, scrollTimeInMillis);
+        SearchRequest request = requestConverter.searchRequest(query, routingResolver.getRouting(), clazz, index, false, scrollTimeInMillis);
         SearchResponse<EntityAsMap> response = execute(client -> client.search(request, EntityAsMap.class));
 
         return getSearchScrollHits(clazz, index, response);

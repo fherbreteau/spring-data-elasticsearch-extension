@@ -16,8 +16,11 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.query.SeqNoPrimaryTerm;
+import org.springframework.data.elasticsearch.core.routing.DefaultRoutingResolver;
+import org.springframework.data.elasticsearch.core.routing.RoutingResolver;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 import org.springframework.data.mapping.callback.EntityCallbacks;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.util.Assert;
 
 import javax.annotation.Nonnull;
@@ -30,6 +33,8 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOperations, ApplicationContextAware {
 
     protected final ElasticsearchConverter elasticsearchConverter;
+    protected final RoutingResolver routingResolver;
+
     @Nullable
     protected EntityCallbacks entityCallbacks;
 
@@ -40,6 +45,9 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     protected AbstractExtendedSearchTemplate(@Nullable ElasticsearchConverter elasticsearchConverter) {
         this.elasticsearchConverter = elasticsearchConverter != null ? elasticsearchConverter
                 : createElasticsearchConverter();
+        MappingContext<? extends ElasticsearchPersistentEntity<?>, ElasticsearchPersistentProperty> mappingContext = this.elasticsearchConverter
+                .getMappingContext();
+        this.routingResolver = new DefaultRoutingResolver(mappingContext);
     }
 
     private ElasticsearchConverter createElasticsearchConverter() {
@@ -141,23 +149,23 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
         ElasticsearchPersistentProperty idProperty = persistentEntity.getIdProperty();
 
         // Only deal with text because ES generated Ids are strings!
-        if (indexedObjectInformation.getId() != null && idProperty != null
+        if (indexedObjectInformation.id() != null && idProperty != null
                 && idProperty.getType().isAssignableFrom(String.class)) {
-            propertyAccessor.setProperty(idProperty, indexedObjectInformation.getId());
+            propertyAccessor.setProperty(idProperty, indexedObjectInformation.id());
         }
 
-        if (indexedObjectInformation.getSeqNo() != null && indexedObjectInformation.getPrimaryTerm() != null
+        if (indexedObjectInformation.seqNo() != null && indexedObjectInformation.primaryTerm() != null
                 && persistentEntity.hasSeqNoPrimaryTermProperty()) {
             ElasticsearchPersistentProperty seqNoPrimaryTermProperty = persistentEntity.getSeqNoPrimaryTermProperty();
             assert seqNoPrimaryTermProperty != null;
             propertyAccessor.setProperty(seqNoPrimaryTermProperty,
-                    new SeqNoPrimaryTerm(indexedObjectInformation.getSeqNo(), indexedObjectInformation.getPrimaryTerm()));
+                    new SeqNoPrimaryTerm(indexedObjectInformation.seqNo(), indexedObjectInformation.primaryTerm()));
         }
 
-        if (indexedObjectInformation.getVersion() != null && persistentEntity.hasVersionProperty()) {
+        if (indexedObjectInformation.version() != null && persistentEntity.hasVersionProperty()) {
             ElasticsearchPersistentProperty versionProperty = persistentEntity.getVersionProperty();
             assert versionProperty != null;
-            propertyAccessor.setProperty(versionProperty, indexedObjectInformation.getVersion());
+            propertyAccessor.setProperty(versionProperty, indexedObjectInformation.version());
         }
 
         return (T) propertyAccessor.getBean();
@@ -212,8 +220,9 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
 
             T entity = reader.read(type, documentAfterLoad);
 
-            IndexedObjectInformation indexedObjectInformation = IndexedObjectInformation.of(
+            IndexedObjectInformation indexedObjectInformation = new IndexedObjectInformation(
                     documentAfterLoad.hasId() ? documentAfterLoad.getId() : null,
+                    documentAfterLoad.getIndex(),
                     documentAfterLoad.getSeqNo(),
                     documentAfterLoad.getPrimaryTerm(),
                     documentAfterLoad.getVersion());

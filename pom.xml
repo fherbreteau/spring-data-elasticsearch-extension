@@ -16,7 +16,7 @@
 
         <!-- Dependencies versions -->
         <spring.version>6.0.9</spring.version>
-        <spring.elasticsearch.version>5.0.5</spring.elasticsearch.version>
+        <spring.elasticsearch.version>5.1.0</spring.elasticsearch.version>
         <elasticsearch-rhlc.version>7.17.10</elasticsearch-rhlc.version>
 
         <!-- CVE Dependencies Fix -->
@@ -303,7 +303,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>${surefire.jacoco.args}</argLine>
+                    <argLine>@{surefire.jacoco.args}</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -311,7 +311,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>${failsafe.jacoco.args}</argLine>
+                    <argLine>@{failsafe.jacoco.args}</argLine>
                 </configuration>
                 <executions>
                     <execution>
