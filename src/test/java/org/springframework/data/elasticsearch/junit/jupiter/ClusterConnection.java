@@ -97,8 +97,7 @@ public class ClusterConnection implements ExtensionContext.Store.CloseableResour
         LOGGER.info("Starting Elasticsearch Container...");
 
         try {
-            Map<String, String> testcontainersProperties = testcontainersProperties(
-            );
+            Map<String, String> testcontainersProperties = testcontainersProperties();
 
             DockerImageName dockerImageName = getDockerImageName(testcontainersProperties);
 
