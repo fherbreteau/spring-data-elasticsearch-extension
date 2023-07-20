@@ -17,7 +17,7 @@
         <!-- Dependencies versions -->
         <spring.version>6.0.9</spring.version>
         <spring.elasticsearch.version>5.1.0</spring.elasticsearch.version>
-        <elasticsearch-rhlc.version>7.17.10</elasticsearch-rhlc.version>
+        <elasticsearch-rhlc.version>7.17.11</elasticsearch-rhlc.version>
 
         <!-- CVE Dependencies Fix -->
         <jackson.cbor.version>2.15.2</jackson.cbor.version>
