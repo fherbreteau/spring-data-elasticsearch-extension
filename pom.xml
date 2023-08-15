@@ -15,8 +15,8 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <!-- Dependencies versions -->
-        <spring.version>6.0.9</spring.version>
-        <spring.elasticsearch.version>5.1.0</spring.elasticsearch.version>
+        <spring.version>6.0.11</spring.version>
+        <spring.elasticsearch.version>5.1.1</spring.elasticsearch.version>
         <elasticsearch-rhlc.version>7.17.11</elasticsearch-rhlc.version>
 
         <!-- CVE Dependencies Fix -->
@@ -26,19 +26,19 @@
 
         <!-- test Dependencies versions -->
         <junit5.version>5.9.3</junit5.version>
-        <mockito.version>5.3.1</mockito.version>
+        <mockito.version>5.4.0</mockito.version>
         <assertj.version>3.24.2</assertj.version>
         <log4j.version>2.20.0</log4j.version>
         <slf4j.version>2.0.7</slf4j.version>
-        <logback.version>1.4.7</logback.version>
+        <logback.version>1.4.8</logback.version>
         <testcontainers.version>1.18.1</testcontainers.version>
 
         <!-- Tools dependencies -->
         <compiler.version>3.11.0</compiler.version>
-        <jacoco.version>0.8.8</jacoco.version>
+        <jacoco.version>0.8.10</jacoco.version>
         <checkstyle-maven.version>3.3.0</checkstyle-maven.version>
         <checkstyle.version>10.9.3</checkstyle.version>
-        <surefire.version>3.1.0</surefire.version>
+        <surefire.version>3.1.2</surefire.version>
         <pitest.version>1.14.1</pitest.version>
 
         <!-- Sonar configuration properties -->
