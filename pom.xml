@@ -21,7 +21,7 @@
 
         <!-- CVE Dependencies Fix -->
         <jackson.cbor.version>2.15.2</jackson.cbor.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
+        <snakeyaml.version>2.1</snakeyaml.version>
         <jakarta.json.version>2.1.2</jakarta.json.version>
 
         <!-- test Dependencies versions -->
