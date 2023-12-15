@@ -35,7 +35,7 @@
 
         <!-- Tools dependencies -->
         <compiler.version>3.11.0</compiler.version>
-        <jacoco.version>0.8.10</jacoco.version>
+        <jacoco.version>0.8.11</jacoco.version>
         <checkstyle-maven.version>3.3.0</checkstyle-maven.version>
         <checkstyle.version>10.12.5</checkstyle.version>
         <surefire.version>3.2.2</surefire.version>
