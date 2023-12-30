@@ -18,6 +18,9 @@
         <spring.version>6.1.2</spring.version>
         <spring.elasticsearch.version>5.2.1</spring.elasticsearch.version>
 
+        <!-- CVE Dependencies Fixes -->
+        <parsson.version>1.1.4</parsson.version>
+
         <!-- test Dependencies versions -->
         <junit5.version>5.10.1</junit5.version>
         <mockito.version>5.8.0</mockito.version>
@@ -44,6 +47,19 @@
             <artifactId>spring-data-elasticsearch</artifactId>
             <groupId>org.springframework.data</groupId>
             <version>${spring.elasticsearch.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.parsson</groupId>
+                    <artifactId>parsson</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Eclipse Parsson CVE -->
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>${parsson.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
