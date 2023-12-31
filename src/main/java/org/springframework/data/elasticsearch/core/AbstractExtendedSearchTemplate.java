@@ -58,7 +58,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     }
 
     @Override
-    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 
         if (entityCallbacks == null) {
             setEntityCallbacks(EntityCallbacks.create(applicationContext));

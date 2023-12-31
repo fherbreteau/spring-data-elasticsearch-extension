@@ -9,7 +9,6 @@ import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.MergedContextConfiguration;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -70,8 +69,8 @@ public class SpringDataElasticsearchExtension
     }
 
     @Override
-    public ContextCustomizer createContextCustomizer(@Nonnull Class<?> testClass,
-                                                     @Nonnull List<ContextConfigurationAttributes> configAttributes) {
+    public ContextCustomizer createContextCustomizer(Class<?> testClass,
+                                                     List<ContextConfigurationAttributes> configAttributes) {
         return this::customizeContext;
     }
 

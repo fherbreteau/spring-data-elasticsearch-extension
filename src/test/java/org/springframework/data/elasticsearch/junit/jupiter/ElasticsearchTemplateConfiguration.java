@@ -9,8 +9,6 @@ import org.springframework.data.elasticsearch.core.RefreshPolicy;
 
 import java.time.Duration;
 
-import static org.springframework.util.StringUtils.hasText;
-
 @Configuration
 public class ElasticsearchTemplateConfiguration extends ElasticsearchConfiguration implements ExtendedSearchConfiguration {
 
