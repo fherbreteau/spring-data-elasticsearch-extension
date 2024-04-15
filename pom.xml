@@ -32,7 +32,7 @@
 
         <!-- Tools dependencies -->
         <compiler.version>3.13.0</compiler.version>
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <checkstyle-maven.version>3.3.1</checkstyle-maven.version>
         <checkstyle.version>10.12.5</checkstyle.version>
         <surefire.version>3.2.3</surefire.version>
