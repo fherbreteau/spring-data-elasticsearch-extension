@@ -35,7 +35,7 @@
         <jacoco.version>0.8.12</jacoco.version>
         <checkstyle-maven.version>3.5.0</checkstyle-maven.version>
         <checkstyle.version>10.17.0</checkstyle.version>
-        <surefire.version>3.2.5</surefire.version>
+        <surefire.version>3.3.1</surefire.version>
         <pitest.version>1.16.3</pitest.version>
 
         <!-- Sonar configuration properties -->
