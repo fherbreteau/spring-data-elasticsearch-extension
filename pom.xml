@@ -19,7 +19,7 @@
         <spring.elasticsearch.version>5.3.3</spring.elasticsearch.version>
 
         <!-- CVE Dependencies Fixes -->
-        <parsson.version>1.1.5</parsson.version>
+        <parsson.version>1.1.7</parsson.version>
 
         <!-- test Dependencies versions -->
         <junit5.version>5.10.3</junit5.version>
