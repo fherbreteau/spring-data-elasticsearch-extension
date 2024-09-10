@@ -16,10 +16,10 @@
 
         <!-- Dependencies versions -->
         <spring.version>6.1.10</spring.version>
-        <spring.elasticsearch.version>5.3.0</spring.elasticsearch.version>
+        <spring.elasticsearch.version>5.3.3</spring.elasticsearch.version>
 
         <!-- CVE Dependencies Fixes -->
-        <parsson.version>1.1.5</parsson.version>
+        <parsson.version>1.1.7</parsson.version>
 
         <!-- test Dependencies versions -->
         <junit5.version>5.10.3</junit5.version>
@@ -33,10 +33,10 @@
         <!-- Tools dependencies -->
         <compiler.version>3.13.0</compiler.version>
         <jacoco.version>0.8.12</jacoco.version>
-        <checkstyle-maven.version>3.3.1</checkstyle-maven.version>
+        <checkstyle-maven.version>3.5.0</checkstyle-maven.version>
         <checkstyle.version>10.17.0</checkstyle.version>
         <surefire.version>3.3.1</surefire.version>
-        <pitest.version>1.15.3</pitest.version>
+        <pitest.version>1.16.3</pitest.version>
 
         <!-- Sonar configuration properties -->
         <sonar.organization>fherbreteau</sonar.organization>
