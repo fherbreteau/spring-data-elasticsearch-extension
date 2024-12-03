@@ -7,13 +7,7 @@
         </encoder>
     </appender>
 
-    <!--
     <logger name="org.springframework.data.elasticsearch.junit" level="debug"/>
-    <logger name="org.springframework.data.elasticsearch.client.WIRE" level="info"/>
-
-    <logger name="org.testcontainers" level="INFO"/>
-    <logger name="com.github.dockerjava" level="INFO"/>
-    -->
 
     <root level="off">
         <appender-ref ref="console"/>
