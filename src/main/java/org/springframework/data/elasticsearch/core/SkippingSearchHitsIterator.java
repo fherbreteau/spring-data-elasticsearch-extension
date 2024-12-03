@@ -5,6 +5,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -71,6 +72,11 @@ class SkippingSearchHitsIterator<T> implements SearchHitsIterator<T> {
     @Override
     public float getMaxScore() {
         return searchHits.getMaxScore();
+    }
+
+    @Override
+    public Duration getExecutionDuration() {
+        return searchHits.getExecutionDuration();
     }
 
     @Override
