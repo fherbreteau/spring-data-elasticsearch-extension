@@ -34,7 +34,7 @@
         <compiler.version>3.14.0</compiler.version>
         <jacoco.version>0.8.12</jacoco.version>
         <checkstyle-maven.version>3.6.0</checkstyle-maven.version>
-        <checkstyle.version>10.21.4</checkstyle.version>
+        <checkstyle.version>10.25.0</checkstyle.version>
         <surefire.version>3.5.3</surefire.version>
         <pitest.version>1.19.0</pitest.version>
 
