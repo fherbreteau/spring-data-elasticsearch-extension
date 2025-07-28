@@ -36,7 +36,7 @@
         <checkstyle-maven.version>3.6.0</checkstyle-maven.version>
         <checkstyle.version>10.26.1</checkstyle.version>
         <surefire.version>3.5.3</surefire.version>
-        <pitest.version>1.20.0</pitest.version>
+        <pitest.version>1.20.1</pitest.version>
 
         <!-- Sonar configuration properties -->
         <sonar.organization>fherbreteau</sonar.organization>
