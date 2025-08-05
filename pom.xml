@@ -25,7 +25,7 @@
         <junit5.version>5.13.4</junit5.version>
         <mockito.version>5.18.0</mockito.version>
         <assertj.version>3.27.3</assertj.version>
-        <log4j.version>2.24.3</log4j.version>
+        <log4j.version>2.25.1</log4j.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.18</logback.version>
         <testcontainers.version>1.21.3</testcontainers.version>
