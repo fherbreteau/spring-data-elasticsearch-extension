@@ -15,7 +15,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <!-- Dependencies versions -->
-        <spring.version>6.2.7</spring.version>
+        <spring.version>6.2.12</spring.version>
         <spring.elasticsearch.version>5.5.2</spring.elasticsearch.version>
 
         <!-- CVE Dependencies Fixes -->
@@ -24,7 +24,7 @@
         <!-- test Dependencies versions -->
         <junit5.version>5.13.4</junit5.version>
         <mockito.version>5.19.0</mockito.version>
-        <assertj.version>3.27.3</assertj.version>
+        <assertj.version>3.27.6</assertj.version>
         <log4j.version>2.25.1</log4j.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.18</logback.version>
@@ -34,7 +34,7 @@
         <compiler.version>3.14.0</compiler.version>
         <jacoco.version>0.8.13</jacoco.version>
         <checkstyle-maven.version>3.6.0</checkstyle-maven.version>
-        <checkstyle.version>10.26.1</checkstyle.version>
+        <checkstyle.version>12.1.1</checkstyle.version>
         <surefire.version>3.5.3</surefire.version>
         <pitest.version>1.20.1</pitest.version>
 
