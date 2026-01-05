@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOperations, ApplicationContextAware {
@@ -58,7 +59,7 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
 
         if (entityCallbacks == null) {
             setEntityCallbacks(EntityCallbacks.create(applicationContext));
@@ -80,9 +81,6 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
      * @since 4.0
      */
     public void setEntityCallbacks(@Nullable EntityCallbacks entityCallbacks) {
-
-        Assert.notNull(entityCallbacks, "entityCallbacks must not be null");
-
         this.entityCallbacks = entityCallbacks;
     }
 
@@ -90,14 +88,11 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     @Nonnull
     @Override
     public <T> SearchHitsIterator<T> searchForStream(@Nullable Query query, int fromIndex, Class<T> clazz, IndexCoordinates index) {
-        Assert.notNull(query, "query must not be null");
-
-        Duration scrollTime = query.getScrollTime();
-        if (scrollTime == null) {
-            scrollTime = Duration.ofMinutes(1);
-        }
+        Duration scrollTime = Optional.ofNullable(query)
+                .map(Query::getScrollTime)
+                .orElse(Duration.ofMinutes(1));
         long scrollTimeInMillis = scrollTime.toMillis();
-        int maxCount = query.getMaxResults() != null ? query.getMaxResults() : 0;
+        int maxCount = Optional.ofNullable(query).map(Query::getMaxResults).orElse(0);
 
         return new SkippingSearchHitsIterator<>(maxCount, fromIndex,
                 searchScrollStart(scrollTimeInMillis, query, clazz, index),
@@ -108,26 +103,26 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
     /*
      * internal use only, not for public API
      */
-    public abstract <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
+    protected abstract <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
                                                               IndexCoordinates index);
 
     /*
      * internal use only, not for public API
      */
-    public abstract <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis,
+    protected abstract <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis,
                                                                  Class<T> clazz, IndexCoordinates index);
 
     /*
      * internal use only, not for public API
      */
-    public void searchScrollClear(String scrollId) {
+    protected void searchScrollClear(String scrollId) {
         searchScrollClear(Collections.singletonList(scrollId));
     }
 
     /*
      * internal use only, not for public API
      */
-    public abstract void searchScrollClear(List<String> scrollIds);
+    protected abstract void searchScrollClear(List<String> scrollIds);
 
     /**
      * @param clazz the entity class
@@ -164,7 +159,6 @@ public abstract class AbstractExtendedSearchTemplate implements ExtendedSearchOp
 
         if (indexedObjectInformation.version() != null && persistentEntity.hasVersionProperty()) {
             ElasticsearchPersistentProperty versionProperty = persistentEntity.getVersionProperty();
-            assert versionProperty != null;
             propertyAccessor.setProperty(versionProperty, indexedObjectInformation.version());
         }
 
