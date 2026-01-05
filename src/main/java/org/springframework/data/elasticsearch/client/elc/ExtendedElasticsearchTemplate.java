@@ -52,7 +52,7 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     }
 
     @Override
-    public <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
+    protected <T> SearchScrollHits<T> searchScrollStart(long scrollTimeInMillis, Query query, Class<T> clazz,
                                                      IndexCoordinates index) {
 
         Assert.notNull(query, "query must not be null");
@@ -65,7 +65,7 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     }
 
     @Override
-    public <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis, Class<T> clazz,
+    protected <T> SearchScrollHits<T> searchScrollContinue(String scrollId, long scrollTimeInMillis, Class<T> clazz,
                                                         IndexCoordinates index) {
 
         Assert.notNull(scrollId, "scrollId must not be null");
@@ -87,7 +87,7 @@ public class ExtendedElasticsearchTemplate extends AbstractExtendedSearchTemplat
     }
 
     @Override
-    public void searchScrollClear(List<String> scrollIds) {
+    protected void searchScrollClear(List<String> scrollIds) {
         Assert.notNull(scrollIds, "scrollIds must not be null");
 
         if (!scrollIds.isEmpty()) {

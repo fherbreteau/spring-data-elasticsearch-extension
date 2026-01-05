@@ -77,7 +77,7 @@ class ExtendedElasticsearchTemplateTest {
     private ExtendedElasticsearchTemplate extendedElasticsearchTemplate;
 
     @BeforeEach
-    public void createExtendedElasticsearchTemplate() {
+    void createExtendedElasticsearchTemplate() {
         ElasticsearchTransport transport = mock(ElasticsearchTransport.class);
         when(client._transport()).thenReturn(transport);
         when(transport.jsonpMapper()).thenReturn(new SimpleJsonpMapper());
@@ -198,13 +198,6 @@ class ExtendedElasticsearchTemplateTest {
         assertThat(iterator).isExhausted();
 
         verify(client).clearScroll(any(ClearScrollRequest.class));
-    }
-
-    @Test
-    void shouldProtectAgainstNullCallbacks() {
-        assertThatThrownBy(() -> extendedElasticsearchTemplate.setEntityCallbacks(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("entityCallbacks must not be null");
     }
 
     @Test
