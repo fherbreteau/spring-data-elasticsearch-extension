@@ -11,19 +11,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.springframework.data.elasticsearch" level="info" additivity="false">
-            <AppenderRef ref="console"/>
-        </Logger>
-        <Logger name="org.testcontainers" level="info" additivity="false">
-            <AppenderRef ref="console"/>
-        </Logger>
-        <Logger name="org.springframework.data.elasticsearch.client.WIRE" level="info" additivity="false">
-            <AppenderRef ref="console"/>
-        </Logger>
-        <Logger name="reactor.netty" level="warn"/>
-        <Logger name="io.netty" level="warn"/>
-
-        <Root level="error">
+        <Root level="off">
             <AppenderRef ref="console"/>
         </Root>
     </Loggers>

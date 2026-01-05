@@ -11,8 +11,7 @@
         <!-- Build configuration -->
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <!-- Dependencies versions -->
         <spring.version>6.2.12</spring.version>
@@ -28,7 +27,7 @@
         <log4j.version>2.25.3</log4j.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.23</logback.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
 
         <!-- Tools dependencies -->
         <compiler.version>3.14.1</compiler.version>
@@ -38,6 +37,7 @@
         <surefire.version>3.5.4</surefire.version>
         <failsafe.version>3.5.4</failsafe.version>
         <pitest.version>1.22.0</pitest.version>
+        <sonar.version>5.5.0.6356</sonar.version>
 
         <!-- Sonar configuration properties -->
         <sonar.organization>fherbreteau</sonar.organization>
@@ -49,20 +49,8 @@
             <artifactId>spring-data-elasticsearch</artifactId>
             <groupId>org.springframework.data</groupId>
             <version>${spring.elasticsearch.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.parsson</groupId>
-                    <artifactId>parsson</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- Eclipse Parsson CVE -->
-        <dependency>
-            <groupId>org.eclipse.parsson</groupId>
-            <artifactId>parsson</artifactId>
-            <version>${parsson.version}</version>
-        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -136,7 +124,7 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>elasticsearch</artifactId>
+            <artifactId>testcontainers-elasticsearch</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -164,7 +152,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -179,6 +166,7 @@
                     <target>${java.version}</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
+                        <arg>-proc:full</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -330,6 +318,12 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.version}</version>
             </plugin>
         </plugins>
     </build>
