@@ -31,7 +31,7 @@
         <testcontainers.version>1.21.3</testcontainers.version>
 
         <!-- Tools dependencies -->
-        <compiler.version>3.14.0</compiler.version>
+        <compiler.version>3.14.1</compiler.version>
         <jacoco.version>0.8.13</jacoco.version>
         <checkstyle-maven.version>3.6.0</checkstyle-maven.version>
         <checkstyle.version>12.1.1</checkstyle.version>
