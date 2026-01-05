@@ -35,11 +35,13 @@
         <jacoco.version>0.8.13</jacoco.version>
         <checkstyle-maven.version>3.6.0</checkstyle-maven.version>
         <checkstyle.version>13.0.0</checkstyle.version>
-        <surefire.version>3.5.3</surefire.version>
+        <surefire.version>3.5.4</surefire.version>
+        <failsafe.version>3.5.4</failsafe.version>
         <pitest.version>1.22.0</pitest.version>
 
         <!-- Sonar configuration properties -->
         <sonar.organization>fherbreteau</sonar.organization>
+        <sonar.projectKey>fherbreteau_spring-data-elasticsearch-extension</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencies>
@@ -182,6 +184,18 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
@@ -273,15 +287,15 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>@{surefire.jacoco.args}</argLine>
+                    <argLine>@{surefire.jacoco.args} -javaagent:${org.mockito:mockito-core:jar}</argLine>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${surefire.version}</version>
+                <version>${failsafe.version}</version>
                 <configuration>
-                    <argLine>@{failsafe.jacoco.args}</argLine>
+                    <argLine>@{failsafe.jacoco.args} -javaagent:${org.mockito:mockito-core:jar}</argLine>
                 </configuration>
                 <executions>
                     <execution>
