@@ -35,7 +35,7 @@
         <checkstyle-maven.version>3.6.0</checkstyle-maven.version>
         <checkstyle.version>13.4.2</checkstyle.version>
         <surefire.version>3.5.5</surefire.version>
-        <failsafe.version>3.5.5</failsafe.version>
+        <failsafe.version>3.5.6</failsafe.version>
         <pitest.version>1.23.1</pitest.version>
         <sonar.version>5.6.0.6792</sonar.version>
 
